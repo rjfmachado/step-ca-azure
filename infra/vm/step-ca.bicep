@@ -14,6 +14,9 @@ param caKeyvaultName string
 @secure()
 param caSecret string
 
+param bastionName string = 'caBastion'
+param bastionSku string = 'Standard'
+
 param dbName string
 param dbLogin string = 'cadbadmin'
 @secure()
@@ -90,6 +93,49 @@ resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
 
   resource subnetAzureBastion 'subnets' existing = {
     name: 'AzureBastionSubnet'
+  }
+}
+
+resource pipBastion 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
+  name: bastionName
+  location: location
+  tags: tags
+  zones: [
+    '1'
+    '2'
+    '3'
+  ]
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAddressVersion: 'IPv4'
+    publicIPAllocationMethod: 'Static'
+  }
+}
+
+resource bastion 'Microsoft.Network/bastionHosts@2021-02-01' = {
+  name: bastionName
+  location: location
+  tags: tags
+  sku: {
+    name: bastionSku
+  }
+  properties: {
+    dnsName: uniqueString(resourceGroup().id)
+    ipConfigurations: [
+      {
+        name: 'IpConf'
+        properties: {
+          subnet: {
+            id: pkiVirtualNetwork::subnetAzureBastion.id
+          }
+          publicIPAddress: {
+            id: pipBastion.id
+          }
+        }
+      }
+    ]
   }
 }
 
