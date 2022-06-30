@@ -11,6 +11,8 @@ param caManagedIdentityName string = 'caManagedIdentity'
 param pkiVirtualNetworkName string
 
 param caKeyvaultName string
+@secure()
+param caSecret string
 
 param dbName string
 param dbLogin string = 'cadbadmin'
@@ -65,6 +67,12 @@ resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
           addressPrefix: '10.0.2.0/24'
         }
       }
+      {
+        name: 'AzureBastionSubnet'
+        properties: {
+          addressPrefix: '10.0.3.0/24'
+        }
+      }
     ]
   }
 
@@ -79,6 +87,10 @@ resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
   resource subnetKeyvault 'subnets' existing = {
     name: 'keyvault'
   }
+
+  resource subnetAzureBastion 'subnets' existing = {
+    name: 'AzureBastionSubnet'
+  }
 }
 
 resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
@@ -91,20 +103,92 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
     enabledForTemplateDeployment: true
     enablePurgeProtection: true
     enableRbacAuthorization: true
-    enableSoftDelete: true
+    enableSoftDelete: false
+    publicNetworkAccess: 'disabled'
     sku: {
       family: 'A'
       name: 'standard'
     }
     tenantId: subscription().tenantId
   }
+
+  resource keyVaultSecret 'secrets@2019-09-01' = {
+    name: 'caSecret'
+    properties: {
+      value: caSecret
+    }
+  }
+}
+
+resource kbPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
+  name: 'caKeyvault'
+  location: location
+  properties: {
+    subnet: {
+      id: pkiVirtualNetwork::subnetKeyvault.id
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'caKeyvault'
+        properties: {
+          privateLinkServiceId: caKeyvault.id
+          groupIds: [
+            'vault'
+          ]
+        }
+      }
+    ]
+  }
+
+  resource kvPrivateEndpointDnsGroup 'privateDnsZoneGroups@2021-05-01' = {
+    name: 'caKeyvault'
+    properties: {
+      privateDnsZoneConfigs: [
+        {
+          name: 'config1'
+          properties: {
+            privateDnsZoneId: keyvaultPrivateDNSZone.id
+          }
+        }
+      ]
+    }
+  }
 }
 
 resource postgrePrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
-  name: 'postgres.database.azure.com'
+  name: 'private.postgres.database.azure.com'
   location: 'global'
   tags: tags
   properties: {}
+
+  resource link 'virtualNetworkLinks@2020-06-01' = {
+    name: 'postgresToVirtualNetwork'
+    location: 'global'
+    properties: {
+      virtualNetwork: {
+        id: pkiVirtualNetwork.id
+      }
+      registrationEnabled: false
+    }
+  }
+}
+
+resource keyvaultPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.vaultcore.azure.net'
+  location: 'global'
+  tags: tags
+  properties: {}
+
+  resource link 'virtualNetworkLinks@2020-06-01' = {
+    name: 'keyvaultToVirtualNetwork'
+    location: 'global'
+    properties: {
+      virtualNetwork: {
+        id: pkiVirtualNetwork.id
+      }
+      registrationEnabled: false
+    }
+  }
 }
 
 resource database 'Microsoft.DBforPostgreSQL/flexibleServers@2022-01-20-preview' = {
