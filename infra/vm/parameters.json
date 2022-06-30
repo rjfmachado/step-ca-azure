@@ -1,0 +1,11 @@
+{
+  "pkiVirtualNetworkName": {
+    "value": "stepca"
+  },
+  "caKeyvaultName": {
+    "value": "stepca"
+  },
+  "dbName": {
+    "value": "stepca"
+  }
+}

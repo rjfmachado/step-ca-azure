@@ -1,20 +1,36 @@
 targetScope = 'resourceGroup'
 
-param name string = 'pki'
 param location string = resourceGroup().location
 param tags object = {
   provisioner: 'bicep'
   source: 'github.com/rjfmachado/bicepregistry/step-ca-azure'
 }
 
-resource cami 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: name
+param caManagedIdentityName string = 'caManagedIdentity'
+
+param pkiVirtualNetworkName string
+
+param caKeyvaultName string
+
+param dbName string
+param dbLogin string = 'cadbadmin'
+@secure()
+param dbLoginPassword string
+param dbserverEdition string = 'GeneralPurpose'
+param dbskuSizeGB int = 128
+param dbInstanceType string = 'Standard_D4ds_v4'
+param dbhaMode string = 'ZoneRedundant'
+param dbavailabilityZone string = '1'
+param dbVersion string = '13'
+
+resource caManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: caManagedIdentityName
   location: location
   tags: tags
 }
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
-  name: name
+resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
+  name: pkiVirtualNetworkName
   location: location
   properties: {
     addressSpace: {
@@ -33,6 +49,14 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
         name: 'database'
         properties: {
           addressPrefix: '10.0.1.0/24'
+          delegations: [
+            {
+              name: 'Microsoft.DBforPostgreSQL/flexibleServers'
+              properties: {
+                serviceName: 'Microsoft.DBforPostgreSQL/flexibleServers'
+              }
+            }
+          ]
         }
       }
       {
@@ -43,10 +67,22 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
       }
     ]
   }
+
+  resource subnetCA 'subnets' existing = {
+    name: 'ca'
+  }
+
+  resource subnetDatabase 'subnets' existing = {
+    name: 'database'
+  }
+
+  resource subnetKeyvault 'subnets' existing = {
+    name: 'keyvault'
+  }
 }
 
-resource kv 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
-  name: 'ricardma${name}'
+resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
+  name: caKeyvaultName
   location: location
   tags: tags
   properties: {
@@ -64,17 +100,39 @@ resource kv 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
   }
 }
 
+resource postgrePrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'postgres.database.azure.com'
+  location: 'global'
+  tags: tags
+  properties: {}
+}
+
 resource database 'Microsoft.DBforPostgreSQL/flexibleServers@2022-01-20-preview' = {
-  name: 'ricardma${name}'
+  name: dbName
   location: location
   tags: tags
   sku: {
-    name: 'Standard_B2s'
-    tier: 'Burstable'
+    name: dbInstanceType
+    tier: dbserverEdition
   }
   properties: {
-    administratorLogin: 'ricardma'
-    administratorLoginPassword: 'Azure123!$'
-    version: '13'
+    administratorLogin: dbLogin
+    administratorLoginPassword: dbLoginPassword
+    version: dbVersion
+    network: {
+      delegatedSubnetResourceId: pkiVirtualNetwork::subnetDatabase.id
+      privateDnsZoneArmResourceId: postgrePrivateDNSZone.id
+    }
+    highAvailability: {
+      mode: dbhaMode
+    }
+    storage: {
+      storageSizeGB: dbskuSizeGB
+    }
+    backup: {
+      backupRetentionDays: 7
+      geoRedundantBackup: 'Disabled'
+    }
+    availabilityZone: dbavailabilityZone
   }
 }
