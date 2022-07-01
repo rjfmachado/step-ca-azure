@@ -21,6 +21,7 @@ param dbName string
 param dbLogin string = 'cadbadmin'
 @secure()
 param dbLoginPassword string
+param dbManagedIdentityName string = 'dbManagedIdentity'
 param dbserverEdition string = 'GeneralPurpose'
 param dbskuSizeGB int = 128
 param dbInstanceType string = 'Standard_D4ds_v4'
@@ -56,9 +57,9 @@ resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
           addressPrefix: '10.0.1.0/24'
           delegations: [
             {
-              name: 'Microsoft.DBforPostgreSQL/flexibleServers'
+              name: 'Microsoft.DBforMySQL/flexibleServers'
               properties: {
-                serviceName: 'Microsoft.DBforPostgreSQL/flexibleServers'
+                serviceName: 'Microsoft.DBforMySQL/flexibleServers'
               }
             }
           ]
@@ -143,6 +144,9 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
   name: caKeyvaultName
   location: location
   tags: tags
+  dependsOn: [
+    keyvaultPrivateDNSZone
+  ]
   properties: {
     enabledForDeployment: true
     enabledForDiskEncryption: true
@@ -166,7 +170,7 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
   }
 }
 
-resource kbPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
+resource kvPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
   name: 'caKeyvault'
   location: location
   properties: {
@@ -201,24 +205,6 @@ resource kbPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
   }
 }
 
-resource postgrePrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
-  name: 'private.postgres.database.azure.com'
-  location: 'global'
-  tags: tags
-  properties: {}
-
-  resource link 'virtualNetworkLinks@2020-06-01' = {
-    name: 'postgresToVirtualNetwork'
-    location: 'global'
-    properties: {
-      virtualNetwork: {
-        id: pkiVirtualNetwork.id
-      }
-      registrationEnabled: false
-    }
-  }
-}
-
 resource keyvaultPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   name: 'privatelink.vaultcore.azure.net'
   location: 'global'
@@ -237,32 +223,60 @@ resource keyvaultPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' =
   }
 }
 
-resource database 'Microsoft.DBforPostgreSQL/flexibleServers@2022-01-20-preview' = {
+resource mysqlPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.mysql.database.azure.com'
+  location: 'global'
+  tags: tags
+  properties: {}
+
+  resource link 'virtualNetworkLinks@2020-06-01' = {
+    name: 'postgresToVirtualNetwork'
+    location: 'global'
+    properties: {
+      virtualNetwork: {
+        id: pkiVirtualNetwork.id
+      }
+      registrationEnabled: false
+    }
+  }
+}
+
+resource dbManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: dbManagedIdentityName
+  location: location
+  tags: tags
+}
+
+resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = {
   name: dbName
   location: location
   tags: tags
   sku: {
-    name: dbInstanceType
-    tier: dbserverEdition
+    name: 'Standard_B2s'
+    tier: 'Burstable'
+  }
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      dbManagedIdentity
+    }
   }
   properties: {
     administratorLogin: dbLogin
     administratorLoginPassword: dbLoginPassword
-    version: dbVersion
+    version: '8.0.21'
+    createMode: 'Default'
+    highAvailability: {
+      mode: 'ZoneRedundant'
+    }
+    maintenanceWindow: {
+      dayOfWeek: 6
+      startHour: 0
+      startMinute: 0
+    }
     network: {
       delegatedSubnetResourceId: pkiVirtualNetwork::subnetDatabase.id
-      privateDnsZoneArmResourceId: postgrePrivateDNSZone.id
+      privateDnsZoneResourceId: mysqlPrivateDNSZone.id
     }
-    highAvailability: {
-      mode: dbhaMode
-    }
-    storage: {
-      storageSizeGB: dbskuSizeGB
-    }
-    backup: {
-      backupRetentionDays: 7
-      geoRedundantBackup: 'Disabled'
-    }
-    availabilityZone: dbavailabilityZone
   }
 }
