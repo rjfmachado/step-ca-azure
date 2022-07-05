@@ -6,6 +6,26 @@ param tags object = {
   source: 'github.com/rjfmachado/bicepregistry/step-ca-azure'
 }
 
+param galleryName string
+
+param imageName string = 'stepca'
+param imageDescription string = 'step-ca on ubuntu linux'
+param imageIdentifier object = {
+  publisher: 'github/rjfmachado'
+  offer: 'step-ca'
+  sku: '0.20.0'
+}
+param imageRecommended object = {
+  memory: {
+    max: 32768
+    min: 2048
+  }
+  vCPUs: {
+    max: 16
+    min: 2
+  }
+}
+
 param caManagedIdentityName string = 'caManagedIdentity'
 
 param pkiVirtualNetworkName string
@@ -269,5 +289,30 @@ resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = {
       delegatedSubnetResourceId: pkiVirtualNetwork::subnetDatabase.id
       privateDnsZoneResourceId: mysqlPrivateDNSZone.id
     }
+  }
+}
+
+resource gallery 'Microsoft.Compute/galleries@2022-01-03' = {
+  name: galleryName
+  location: location
+  tags: tags
+  properties: {
+    description: 'Host step-ca images for VMSS deployment.'
+  }
+}
+
+resource stepcaImage 'Microsoft.Compute/galleries/images@2022-01-03' = {
+  name: imageName
+  location: location
+  tags: tags
+  parent: gallery
+  properties: {
+    architecture: 'x64'
+    description: imageDescription
+    hyperVGeneration: 'V2'
+    identifier: imageIdentifier
+    osState: 'Generalized'
+    osType: 'Linux'
+    recommended: imageRecommended
   }
 }
