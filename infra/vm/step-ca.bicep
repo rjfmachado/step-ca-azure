@@ -172,9 +172,12 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
   }
 }
 
-resource kvPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
+resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
   name: 'caKeyvault'
   location: location
+  dependsOn: [
+    keyvaultPrivateDNSZone::linkVirtualNetwork
+  ]
   properties: {
     subnet: {
       id: pkiVirtualNetwork::subnetKeyvault.id
@@ -213,7 +216,7 @@ resource keyvaultPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' =
   tags: tags
   properties: {}
 
-  resource link 'virtualNetworkLinks@2020-06-01' = {
+  resource linkVirtualNetwork 'virtualNetworkLinks@2020-06-01' = {
     name: 'keyvaultToVirtualNetwork'
     location: 'global'
     properties: {
@@ -231,7 +234,7 @@ resource mysqlPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   tags: tags
   properties: {}
 
-  resource link 'virtualNetworkLinks@2020-06-01' = {
+  resource linkVirtualNetwork 'virtualNetworkLinks@2020-06-01' = {
     name: 'postgresToVirtualNetwork'
     location: 'global'
     properties: {
@@ -254,6 +257,9 @@ resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = {
   location: location
   tags: tags
   sku: dbSku
+  dependsOn: [
+    mysqlPrivateDNSZone::linkVirtualNetwork
+  ]
   properties: {
     administratorLogin: dbLogin
     administratorLoginPassword: dbLoginPassword
