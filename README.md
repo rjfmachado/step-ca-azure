@@ -1,5 +1,9 @@
 # step-ca-azure
 
+An implementation of step-ca on Azure.
+
+## Documentation
+
 [ ] https://github.com/wasabii/step-ca-azure
 [ ] https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/
 [ ] https://github.com/smallstep/certificates
@@ -15,3 +19,10 @@
 [ ] https://smallstep.com/docs/step-ca/integrations
 
 [ ] https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics#3-confirm-that-the-key-vault-firewall-is-properly-configured
+
+## Backlog
+
+[ ] Add High Availability to MySQL
+[ ] Add High Availability to step-ca
+[ ] Add VMSS base image
+[ ] Review public access/firewall for services behind Private Endpoint

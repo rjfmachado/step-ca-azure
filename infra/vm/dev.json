@@ -1,0 +1,14 @@
+{
+  "pkiVirtualNetworkName": {
+    "value": "stepcadev1"
+  },
+  "caKeyvaultName": {
+    "value": "ricardmakvdev1"
+  },
+  "dbName": {
+    "value": "stepcadev1"
+  },
+  "location": {
+    "value": "westeurope"
+  }
+}

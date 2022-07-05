@@ -22,12 +22,14 @@ param dbLogin string = 'cadbadmin'
 @secure()
 param dbLoginPassword string
 param dbManagedIdentityName string = 'dbManagedIdentity'
-param dbserverEdition string = 'GeneralPurpose'
-param dbskuSizeGB int = 128
-param dbInstanceType string = 'Standard_D4ds_v4'
-param dbhaMode string = 'ZoneRedundant'
-param dbavailabilityZone string = '1'
-param dbVersion string = '13'
+param dbSku object = {
+  name: 'Standard_B2s'
+  tier: 'Burstable'
+}
+param dbHighAvailability object = {
+  mode: 'Disabled'
+}
+param dbVersion string = '5.7'
 
 resource caManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
   name: caManagedIdentityName
@@ -251,29 +253,12 @@ resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = {
   name: dbName
   location: location
   tags: tags
-  sku: {
-    name: 'Standard_B2s'
-    tier: 'Burstable'
-  }
-  identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      dbManagedIdentity
-    }
-  }
+  sku: dbSku
   properties: {
     administratorLogin: dbLogin
     administratorLoginPassword: dbLoginPassword
-    version: '8.0.21'
-    createMode: 'Default'
-    highAvailability: {
-      mode: 'ZoneRedundant'
-    }
-    maintenanceWindow: {
-      dayOfWeek: 6
-      startHour: 0
-      startMinute: 0
-    }
+    version: dbVersion
+    highAvailability: dbHighAvailability
     network: {
       delegatedSubnetResourceId: pkiVirtualNetwork::subnetDatabase.id
       privateDnsZoneResourceId: mysqlPrivateDNSZone.id

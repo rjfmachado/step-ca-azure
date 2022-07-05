@@ -1,0 +1,25 @@
+{
+  "pkiVirtualNetworkName": {
+    "value": "stepcaprod1"
+  },
+  "caKeyvaultName": {
+    "value": "ricardmakvprod1"
+  },
+  "dbName": {
+    "value": "stepcaprod1"
+  },
+  "location": {
+    "value": "westeurope"
+  },
+  "dbSku": {
+    "value": {
+      "name": "Standard_D2ds_v4",
+      "tier": "GeneralPurpose"
+    }
+  },
+  "dbHighAvailability": {
+    "value": {
+      "mode": "ZoneRedundant"
+    }
+  }
+}
