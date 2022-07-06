@@ -26,3 +26,4 @@ An implementation of step-ca on Azure.
 [ ] Add High Availability to step-ca
 [ ] Add VMSS base image
 [ ] Review public access/firewall for services behind Private Endpoint
+[ ] Try Mariner 2.0

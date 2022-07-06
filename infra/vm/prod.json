@@ -8,6 +8,9 @@
   "dbName": {
     "value": "stepcaprod1"
   },
+  "galleryName": {
+    "value": "stepcadev1"
+  },
   "location": {
     "value": "westeurope"
   },

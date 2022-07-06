@@ -10,21 +10,8 @@ param galleryName string
 
 param imageName string = 'stepca'
 param imageDescription string = 'step-ca on ubuntu linux'
-param imageIdentifier object = {
-  publisher: 'github/rjfmachado'
-  offer: 'step-ca'
-  sku: '0.20.0'
-}
-param imageRecommended object = {
-  memory: {
-    max: 32768
-    min: 2048
-  }
-  vCPUs: {
-    max: 16
-    min: 2
-  }
-}
+param imageIdentifier object
+param imageRecommended object
 
 param caManagedIdentityName string = 'caManagedIdentity'
 
@@ -51,10 +38,27 @@ param dbHighAvailability object = {
 }
 param dbVersion string = '5.7'
 
-resource caManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: caManagedIdentityName
-  location: location
-  tags: tags
+param caVMName string
+param caVMAdminUsername string
+
+@description('SSH Key')
+@secure()
+param caVMsshKey string
+
+@description('The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version.')
+param caVMOSVersion string = '18.04-LTS'
+param caVMSize string = 'Standard_B2s'
+
+var caVMlinuxConfiguration = {
+  disablePasswordAuthentication: true
+  ssh: {
+    publicKeys: [
+      {
+        path: '/home/${caVMAdminUsername}/.ssh/authorized_keys'
+        keyData: caVMsshKey
+      }
+    ]
+  }
 }
 
 resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
@@ -314,5 +318,102 @@ resource stepcaImage 'Microsoft.Compute/galleries/images@2022-01-03' = {
     osState: 'Generalized'
     osType: 'Linux'
     recommended: imageRecommended
+  }
+}
+
+resource caManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: caManagedIdentityName
+  location: location
+  tags: tags
+}
+
+resource cavmnic 'Microsoft.Network/networkInterfaces@2021-05-01' = {
+  name: '${caVMName}-nic'
+  location: location
+  tags: tags
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          subnet: {
+            id: pkiVirtualNetwork::subnetCA.id
+          }
+          privateIPAllocationMethod: 'Static'
+        }
+      }
+    ]
+    networkSecurityGroup: {
+      id: cavmnsg.id
+    }
+  }
+}
+
+resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
+  name: '${caVMName}-nsg'
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'SSH'
+        properties: {
+          priority: 1000
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '22'
+        }
+      }
+      {
+        name: 'CA'
+        properties: {
+          priority: 1001
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '9000'
+        }
+      }
+    ]
+  }
+}
+
+resource cavm 'Microsoft.Compute/virtualMachines@2021-11-01' = {
+  name: caVMName
+  location: location
+  properties: {
+    hardwareProfile: {
+      vmSize: caVMSize
+    }
+    storageProfile: {
+      osDisk: {
+        createOption: 'FromImage'
+      }
+
+      imageReference: {
+        publisher: 'Canonical'
+        offer: 'UbuntuServer'
+        sku: caVMOSVersion
+        version: 'latest'
+      }
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: cavmnic.id
+        }
+      ]
+    }
+    osProfile: {
+      computerName: caVMName
+      adminUsername: caVMAdminUsername
+      linuxConfiguration: caVMlinuxConfiguration
+    }
   }
 }

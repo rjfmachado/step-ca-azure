@@ -1,4 +1,10 @@
 {
+  "caVMName": {
+    "value": "stepcadev1"
+  },
+  "caVMAdminUsername": {
+    "value": "stepcaadmin"
+  },
   "pkiVirtualNetworkName": {
     "value": "stepcadev1"
   },
@@ -7,6 +13,24 @@
   },
   "dbName": {
     "value": "stepcadev1"
+  },
+  "galleryName": {
+    "value": "stepcadev1"
+  },
+  "imageIdentifier": {
+    "publisher": "rjfmachado",
+    "offer": "step-ca",
+    "sku": "0.20.0"
+  },
+  "imageRecommended": {
+    "memory": {
+      "max": 32768,
+      "min": 2048
+    },
+    "vCPUs": {
+      "max": 16,
+      "min": 2
+    }
   },
   "location": {
     "value": "westeurope"
