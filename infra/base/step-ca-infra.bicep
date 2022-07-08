@@ -7,13 +7,13 @@ param tags object = {
 }
 
 param galleryName string
+param galleryManagedIdentityName string = 'galleryManagedIdentity'
 
 param imageName string = 'stepca'
 param imageDescription string = 'step-ca on ubuntu linux'
 param imageIdentifier object
+param imageGeneration string = 'V1'
 param imageRecommended object
-
-param caManagedIdentityName string = 'caManagedIdentity'
 
 param pkiVirtualNetworkName string
 
@@ -29,6 +29,7 @@ param dbLogin string = 'cadbadmin'
 @secure()
 param dbLoginPassword string
 param dbManagedIdentityName string = 'dbManagedIdentity'
+
 param dbSku object = {
   name: 'Standard_B2s'
   tier: 'Burstable'
@@ -48,6 +49,8 @@ param caVMsshKey string
 @description('The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version.')
 param caVMOSVersion string = '18.04-LTS'
 param caVMSize string = 'Standard_B2s'
+
+param caManagedIdentityName string = 'caManagedIdentity'
 
 var caVMlinuxConfiguration = {
   disablePasswordAuthentication: true
@@ -305,7 +308,49 @@ resource gallery 'Microsoft.Compute/galleries@2022-01-03' = {
   }
 }
 
-resource stepcaImage 'Microsoft.Compute/galleries/images@2022-01-03' = {
+resource galleryManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: galleryManagedIdentityName
+  location: location
+  tags: tags
+}
+
+resource galleryImageBuilderRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' = {
+  name: guid(resourceGroup().id, subscription().id, 'Image Builder Service Image Contributor')
+  properties: {
+    roleName: 'Image Builder Service Image Contributor'
+    description: 'Image Builder access to create resources for the image build, you should delete or split out as appropriate'
+    type: 'customRole'
+    permissions: [
+      {
+        actions: [
+          'Microsoft.Compute/galleries/read'
+          'Microsoft.Compute/galleries/images/read'
+          'Microsoft.Compute/galleries/images/versions/read'
+          'Microsoft.Compute/galleries/images/versions/write'
+          'Microsoft.Compute/images/write'
+          'Microsoft.Compute/images/read'
+          'Microsoft.Compute/images/delete'
+        ]
+        notActions: []
+      }
+    ]
+    assignableScopes: [
+      resourceGroup().id
+    ]
+  }
+}
+
+resource galleryImageBuilderRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+  name: guid(resourceGroup().id, subscription().id, 'Image Builder Service Image Contributor')
+  scope: gallery
+  properties: {
+    principalId: galleryManagedIdentity.properties.principalId
+    roleDefinitionId: galleryImageBuilderRoleDefinition.id
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource stepcaImageDefinition 'Microsoft.Compute/galleries/images@2022-01-03' = {
   name: imageName
   location: location
   tags: tags
@@ -313,7 +358,7 @@ resource stepcaImage 'Microsoft.Compute/galleries/images@2022-01-03' = {
   properties: {
     architecture: 'x64'
     description: imageDescription
-    hyperVGeneration: 'V2'
+    hyperVGeneration: imageGeneration
     identifier: imageIdentifier
     osState: 'Generalized'
     osType: 'Linux'
@@ -339,7 +384,7 @@ resource cavmnic 'Microsoft.Network/networkInterfaces@2021-05-01' = {
           subnet: {
             id: pkiVirtualNetwork::subnetCA.id
           }
-          privateIPAllocationMethod: 'Static'
+          privateIPAllocationMethod: 'Dynamic'
         }
       }
     ]
@@ -384,7 +429,7 @@ resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
   }
 }
 
-resource cavm 'Microsoft.Compute/virtualMachines@2021-11-01' = {
+resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
   name: caVMName
   location: location
   properties: {
