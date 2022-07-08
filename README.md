@@ -45,30 +45,26 @@ Set the path to the SSH public key used to login to the CA (default: pkideploy).
 
 ## Documentation
 
-[ ] https://github.com/wasabii/step-ca-azure
-[ ] https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/
-[ ] https://github.com/smallstep/certificates
-[ ] https://smallstep.com/docs/step-ca/provisioners
-[ ] https://artifacthub.io/packages/helm/smallstep/step-certificates
-[ ] https://hub.docker.com/r/smallstep/step-ca
-[ ] https://github.com/smallstep/autocert
+https://github.com/wasabii/step-ca-azure
+https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/
+https://github.com/smallstep/certificates
+https://smallstep.com/docs/step-ca/provisioners
+https://artifacthub.io/packages/helm/smallstep/step-certificates
+https://hub.docker.com/r/smallstep/step-ca
+https://github.com/smallstep/autocert
 
-[ ] https://smallstep.com/docs/design-document
-[ ] https://smallstep.com/docs/step-ca/certificate-authority-server-production/#load-balancing-or-proxying-step-ca-traffic
-[ ] https://smallstep.com/docs/step-ca/certificate-authority-server-production#high-availability
-
-[ ] https://smallstep.com/docs/step-ca/integrations
-
-[ ] https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics#3-confirm-that-the-key-vault-firewall-is-properly-configured
-
-[ ] https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-troubleshoot
+https://smallstep.com/docs/design-document
+https://smallstep.com/docs/step-ca/certificate-authority-server-production/#load-balancing-or-proxying-step-ca-traffic
+https://smallstep.com/docs/step-ca/integrations
+https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics#3-confirm-that-the-key-vault-firewall-is-properly-configured
+https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-troubleshoot
 
 ## Backlog
 
-[ ] Add High Availability to MySQL  
-[ ] Add High Availability to step-ca  
-[ ] Add VMSS base image  
-[ ] Review public access/firewall for services behind Private Endpoint  
-[ ] Try Mariner 2.0  
-[ ] Move to Generation 2 Virtual Machines  
-[ ] Add support for Managed HSM and Dedicated HSM for CA secrets  
+* [ ] Add High Availability to MySQL  
+* [ ] Add High Availability to step-ca  
+* [ ] Add VMSS base image  
+* [ ] Review public access/firewall for services behind Private Endpoint  
+* [ ] Try Mariner 2.0  
+* [ ] Move to Generation 2 Virtual Machines  
+* [ ] Add support for Managed HSM and Dedicated HSM for CA secrets  
