@@ -6,7 +6,14 @@ param tags object = {
   source: 'github.com/rjfmachado/bicepregistry/step-ca-azure'
 }
 
-param caManagedIdentityName string = 'caManagedIdentity'
+param galleryName string
+param galleryManagedIdentityName string = 'galleryManagedIdentity'
+
+param imageName string = 'stepca'
+param imageDescription string = 'step-ca on ubuntu linux'
+param imageIdentifier object
+param imageGeneration string = 'V1'
+param imageRecommended object
 
 param pkiVirtualNetworkName string
 
@@ -22,6 +29,7 @@ param dbLogin string = 'cadbadmin'
 @secure()
 param dbLoginPassword string
 param dbManagedIdentityName string = 'dbManagedIdentity'
+
 param dbSku object = {
   name: 'Standard_B2s'
   tier: 'Burstable'
@@ -31,10 +39,29 @@ param dbHighAvailability object = {
 }
 param dbVersion string = '5.7'
 
-resource caManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: caManagedIdentityName
-  location: location
-  tags: tags
+param caVMName string
+param caVMAdminUsername string
+
+@description('SSH Key')
+@secure()
+param caVMsshKey string
+
+@description('The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version.')
+param caVMOSVersion string = '18.04-LTS'
+param caVMSize string = 'Standard_B2s'
+
+param caManagedIdentityName string = 'caManagedIdentity'
+
+var caVMlinuxConfiguration = {
+  disablePasswordAuthentication: true
+  ssh: {
+    publicKeys: [
+      {
+        path: '/home/${caVMAdminUsername}/.ssh/authorized_keys'
+        keyData: caVMsshKey
+      }
+    ]
+  }
 }
 
 resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
@@ -268,6 +295,170 @@ resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = {
     network: {
       delegatedSubnetResourceId: pkiVirtualNetwork::subnetDatabase.id
       privateDnsZoneResourceId: mysqlPrivateDNSZone.id
+    }
+  }
+}
+
+resource gallery 'Microsoft.Compute/galleries@2022-01-03' = {
+  name: galleryName
+  location: location
+  tags: tags
+  properties: {
+    description: 'Host step-ca images for VMSS deployment.'
+  }
+}
+
+resource galleryManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: galleryManagedIdentityName
+  location: location
+  tags: tags
+}
+
+resource galleryImageBuilderRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' = {
+  name: guid(resourceGroup().id, subscription().id, 'Image Builder Service Image Contributor')
+  properties: {
+    roleName: 'Image Builder Service Image Contributor'
+    description: 'Image Builder access to create resources for the image build, you should delete or split out as appropriate'
+    type: 'customRole'
+    permissions: [
+      {
+        actions: [
+          'Microsoft.Compute/galleries/read'
+          'Microsoft.Compute/galleries/images/read'
+          'Microsoft.Compute/galleries/images/versions/read'
+          'Microsoft.Compute/galleries/images/versions/write'
+          'Microsoft.Compute/images/write'
+          'Microsoft.Compute/images/read'
+          'Microsoft.Compute/images/delete'
+        ]
+        notActions: []
+      }
+    ]
+    assignableScopes: [
+      resourceGroup().id
+    ]
+  }
+}
+
+resource galleryImageBuilderRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+  name: guid(resourceGroup().id, subscription().id, 'Image Builder Service Image Contributor')
+  scope: gallery
+  properties: {
+    principalId: galleryManagedIdentity.properties.principalId
+    roleDefinitionId: galleryImageBuilderRoleDefinition.id
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource stepcaImageDefinition 'Microsoft.Compute/galleries/images@2022-01-03' = {
+  name: imageName
+  location: location
+  tags: tags
+  parent: gallery
+  properties: {
+    architecture: 'x64'
+    description: imageDescription
+    hyperVGeneration: imageGeneration
+    identifier: imageIdentifier
+    osState: 'Generalized'
+    osType: 'Linux'
+    recommended: imageRecommended
+  }
+}
+
+resource caManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: caManagedIdentityName
+  location: location
+  tags: tags
+}
+
+resource cavmnic 'Microsoft.Network/networkInterfaces@2021-05-01' = {
+  name: '${caVMName}-nic'
+  location: location
+  tags: tags
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          subnet: {
+            id: pkiVirtualNetwork::subnetCA.id
+          }
+          privateIPAllocationMethod: 'Dynamic'
+        }
+      }
+    ]
+    networkSecurityGroup: {
+      id: cavmnsg.id
+    }
+  }
+}
+
+resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
+  name: '${caVMName}-nsg'
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'SSH'
+        properties: {
+          priority: 1000
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '22'
+        }
+      }
+      {
+        name: 'CA'
+        properties: {
+          priority: 1001
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '9000'
+        }
+      }
+    ]
+  }
+}
+
+resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
+  name: caVMName
+  location: location
+  properties: {
+    hardwareProfile: {
+      vmSize: caVMSize
+    }
+    storageProfile: {
+      osDisk: {
+        createOption: 'FromImage'
+      }
+
+      imageReference: {
+        publisher: 'Canonical'
+        offer: 'UbuntuServer'
+        sku: caVMOSVersion
+        version: 'latest'
+      }
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: cavmnic.id
+        }
+      ]
+    }
+    osProfile: {
+      computerName: caVMName
+      adminUsername: caVMAdminUsername
+      linuxConfiguration: caVMlinuxConfiguration
     }
   }
 }
