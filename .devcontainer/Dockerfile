@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/vscode/devcontainers/base:focal
 
 # [Option] Install zsh
-ARG INSTALL_ZSH="true"
+ARG INSTALL_ZSH="false"
 # [Option] Upgrade OS packages to their latest versions
 ARG UPGRADE_PACKAGES="false"
 
