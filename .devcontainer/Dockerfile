@@ -1,5 +1,5 @@
 # You can pick any Debian/Ubuntu-based image. 😊
-FROM mcr.microsoft.com/vscode/devcontainers/base:jammy
+FROM mcr.microsoft.com/vscode/devcontainers/base:focal
 
 # [Option] Install zsh
 ARG INSTALL_ZSH="true"
