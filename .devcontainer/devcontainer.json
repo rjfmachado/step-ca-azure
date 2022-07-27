@@ -1,7 +1,12 @@
 {
 	"name": "Azure CLI",
-	"dockerFile": "Dockerfile",
-	// Configure tool-specific properties.
+	"build": {
+		"dockerfile": "Dockerfile",
+		// Configure tool-specific properties.
+		"args": {
+			"VARIANT": "focal"
+		}
+	},
 	"customizations": {
 		// Configure properties specific to VS Code.
 		"vscode": {
