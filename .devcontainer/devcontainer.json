@@ -12,12 +12,14 @@
 		"vscode": {
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
+				"github.copilot",
 				"ms-vscode.azurecli",
 				"ms-dotnettools.vscode-dotnet-runtime",
 				"ms-azuretools.vscode-bicep",
 				"msazurermtools.azurerm-vscode-tools",
 				"ms-vscode.azure-account",
-				"ms-azuretools.vscode-azureresourcegroups"
+				"ms-azuretools.vscode-azureresourcegroups",
+				"heaths.vscode-guid"
 			]
 		}
 	},

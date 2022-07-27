@@ -4,16 +4,17 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:focal
 # [Option] Install zsh
 ARG INSTALL_ZSH="false"
 # [Option] Upgrade OS packages to their latest versions
-ARG UPGRADE_PACKAGES="false"
+ARG UPGRADE_PACKAGES="true"
 
 # Install needed packages and setup non-root user. Use a separate RUN statement to add your own dependencies.
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 COPY library-scripts/*.sh /tmp/library-scripts/
-# bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" "true" "true" \
+RUN bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" "true" "true" \
     # Install the Azure CLI
-RUN bash /tmp/library-scripts/azcli-debian.sh \
+    && bash /tmp/library-scripts/azcli-debian.sh \
+    # Install the GitHub CLI and tools
     && bash /tmp/library-scripts/github-debian.sh \
     # Clean up
     && apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/library-scripts
