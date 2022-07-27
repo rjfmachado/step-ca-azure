@@ -9,7 +9,8 @@
 			"extensions": [
 				"ms-vscode.azurecli",
 				"ms-dotnettools.vscode-dotnet-runtime",
-				"ms-azuretools.vscode-bicep"
+				"ms-azuretools.vscode-bicep",
+				"msazurermtools.azurerm-vscode-tools"
 			]
 		}
 	},
