@@ -15,7 +15,9 @@
 				"ms-vscode.azurecli",
 				"ms-dotnettools.vscode-dotnet-runtime",
 				"ms-azuretools.vscode-bicep",
-				"msazurermtools.azurerm-vscode-tools"
+				"msazurermtools.azurerm-vscode-tools",
+				"ms-vscode.azure-account",
+				"ms-azuretools.vscode-azureresourcegroups"
 			]
 		}
 	},
