@@ -19,7 +19,7 @@ An implementation of step-ca on Azure.
   az account show -o tsv --query name
   ```
 
-1. Optionally, generate an SSH key to access the CA.
+1. Optionally, generate an SSH key to access the CA. If you do not, you have to bring your ssh key pair to the codespaces environment.
 
   ```bash
   ssh-keygen -t rsa -b 4096 -o -a 100
@@ -54,7 +54,7 @@ Set the path to the SSH public key used to login to the CA (default: pkideploy).
 ```bash
 vmid=$(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
 az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
-   --auth-type ssh-key --username stepcaadmin --ssh-key $SSH_PUBLIC_KEY_PATH \
+   --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/id_rsa \
    --target-resource-id $vmid
 ```
 

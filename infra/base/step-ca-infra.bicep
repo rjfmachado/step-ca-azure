@@ -144,7 +144,7 @@ resource pipBastion 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
   }
 }
 
-resource bastion 'Microsoft.Network/bastionHosts@2021-02-01' = {
+resource bastion 'Microsoft.Network/bastionHosts@2022-01-01' = {
   name: bastionName
   location: location
   tags: tags
@@ -152,7 +152,7 @@ resource bastion 'Microsoft.Network/bastionHosts@2021-02-01' = {
     name: bastionSku
   }
   properties: {
-    dnsName: uniqueString(resourceGroup().id)\
+    dnsName: uniqueString(resourceGroup().id)
     enableTunneling: true
     ipConfigurations: [
       {
