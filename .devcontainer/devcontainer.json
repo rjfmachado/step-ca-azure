@@ -1,0 +1,37 @@
+{
+	"name": "Azure CLI",
+	"build": {
+		"dockerfile": "Dockerfile",
+		// Configure tool-specific properties.
+		"args": {
+			"VARIANT": "focal"
+		}
+	},
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"github.copilot",
+				"ms-vscode.azurecli",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"ms-azuretools.vscode-bicep",
+				"msazurermtools.azurerm-vscode-tools",
+				"ms-vscode.azure-account",
+				"ms-azuretools.vscode-azureresourcegroups",
+				"heaths.vscode-guid"
+			]
+		}
+	},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": [
+		"az bicep install",
+		"az extension add --name ssh"
+	],
+	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
+	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode"
+}
