@@ -152,7 +152,8 @@ resource bastion 'Microsoft.Network/bastionHosts@2021-02-01' = {
     name: bastionSku
   }
   properties: {
-    dnsName: uniqueString(resourceGroup().id)
+    dnsName: uniqueString(resourceGroup().id)\
+    enableTunneling: true
     ipConfigurations: [
       {
         name: 'IpConf'

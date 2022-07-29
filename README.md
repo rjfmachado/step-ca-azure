@@ -49,11 +49,14 @@ Set the path to the SSH public key used to login to the CA (default: pkideploy).
   gh workflow run deploy.yml
   ```
 
-1. Optionally, run the individual module deployment workflows.
+1. Finally, connect to your CA via the Jump Host
 
-  ```bash
-  gh workflow run
-  ```
+```bash
+vmid=$(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
+az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
+   --auth-type ssh-key --username stepcaadmin --ssh-key $SSH_PUBLIC_KEY_PATH \
+   --target-resource-id $vmid
+```
 
 ## Requirements
 
