@@ -19,7 +19,7 @@ An implementation of step-ca on Azure.
   az account show -o tsv --query name
   ```
 
-1.Optionally, generate an SSH key to access the CA.
+1. Optionally, generate an SSH key to access the CA.
 
   ```bash
   ssh-keygen -t rsa -b 4096 -o -a 100
