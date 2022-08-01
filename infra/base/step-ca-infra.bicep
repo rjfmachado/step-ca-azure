@@ -433,6 +433,12 @@ resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
 resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
   name: caVMName
   location: location
+  tags: tags
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${caManagedIdentity.id}': {
+  }
   properties: {
     hardwareProfile: {
       vmSize: caVMSize
