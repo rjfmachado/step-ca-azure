@@ -437,7 +437,8 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      '${caManagedIdentity.id}': {
+      '${caManagedIdentity.id}': {}
+    }
   }
   properties: {
     hardwareProfile: {
@@ -467,5 +468,20 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
       adminUsername: caVMAdminUsername
       linuxConfiguration: caVMlinuxConfiguration
     }
+  }
+}
+
+resource keyvaultAdminrole 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: '00482a5a-887f-4fb3-b363-3b7fe8e74483'
+}
+
+resource cavmkeyvaultadmin 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+  name: guid(resourceGroup().id, subscription().id, 'Key Vault Administrator')
+  scope: caKeyvault
+  properties: {
+    principalId: caManagedIdentity.properties.principalId
+    roleDefinitionId: keyvaultAdminrole.id
+    principalType: 'ServicePrincipal'
   }
 }
