@@ -89,3 +89,4 @@ az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
 - [ ] Try Mariner 2.0  
 - [ ] Move to Generation 2 Virtual Machines  
 - [ ] Add support for Managed HSM and Dedicated HSM for CA secrets  
+- [ ] Add deploy to azure https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173
