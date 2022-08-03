@@ -1,38 +1,50 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.202.5/containers/ubuntu
 {
-	"name": "Azure CLI",
+	"name": "Ubuntu",
+	"runArgs": [
+		"--init"
+	],
 	"build": {
 		"dockerfile": "Dockerfile",
-		// Configure tool-specific properties.
+		// Update 'VARIANT' to pick an Ubuntu version: hirsute, focal, bionic
+		// Use hirsute or bionic on local arm64/Apple Silicon.
 		"args": {
 			"VARIANT": "focal"
 		}
 	},
-	"customizations": {
-		// Configure properties specific to VS Code.
-		"vscode": {
-			// Add the IDs of extensions you want installed when the container is created.
-			"extensions": [
-				"github.copilot",
-				"ms-vscode.azurecli",
-				"ms-dotnettools.vscode-dotnet-runtime",
-				"ms-azuretools.vscode-bicep",
-				"msazurermtools.azurerm-vscode-tools",
-				"ms-vscode.azure-account",
-				"ms-azuretools.vscode-azureresourcegroups",
-				"heaths.vscode-guid",
-				"donjayamanne.githistory"
-			]
-		}
+	// Set *default* container specific settings.json values on container create.
+	"settings": {},
+	// Codespaces struggles running/debugging the web app with 4gb memory, so lets explicitly require 8gb
+	"hostRequirements": {
+		"memory": "8gb"
 	},
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"cschleiden.vscode-github-actions",
+		"github.copilot",
+		"ms-vscode.azurecli",
+		"ms-dotnettools.vscode-dotnet-runtime",
+		"ms-azuretools.vscode-bicep",
+		"msazurermtools.azurerm-vscode-tools",
+		"ms-vscode.azure-account",
+		"ms-azuretools.vscode-azureresourcegroups",
+		"heaths.vscode-guid",
+		"donjayamanne.githistory"
+	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "az bicep install && az extension add --name ssh",
-	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
-	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
-	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	//"postStartCommand": "",
+	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 	"features": {
+		"kubectl-helm-minikube": "1.21",
+		"github-cli": "latest",
+		"azure-cli": "latest",
+		"powershell": "latest",
+		"terraform": "latest",
 		"sshd": "latest"
 	}
 }

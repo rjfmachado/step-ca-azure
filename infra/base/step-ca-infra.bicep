@@ -494,3 +494,5 @@ resource cavmkeyvaultadmin 'Microsoft.Authorization/roleAssignments@2020-10-01-p
     principalType: 'ServicePrincipal'
   }
 }
+
+output caManagedIdentityClientId string = caManagedIdentity.properties.clientId

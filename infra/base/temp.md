@@ -3,17 +3,22 @@ export AZURE_LOCATION='westeurope'
 export AAD_DEPLOY_APP_NAME='pkideploy'
 export SSH_PUBLIC_KEY_PATH='~/.ssh/id_rsa.pub'
 
-ssh-keygen 
-//if they container got rebuilt - this breaks the deployment... need a more permanent solution..
-
+#NEED TO GET THE KEYS IN THE CONTAINER
 
 az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION -o none
-az deployment group create -g $AZURE_RG_NAME --template-file infra/base/step-ca-infra.bicep --parameters infra/base/defaults.json --parameters caVMsshKey=@$SSH_PUBLIC_KEY_PATH -o none
+az deployment group create -g $AZURE_RG_NAME --template-file infra/base/step-ca-infra.bicep --parameters infra/base/defaults.json --parameters caVMPublicSshKey=@$SSH_PUBLIC_KEY_PATH -o none
 
+#Get the client Id, need to pass it into the VM
+az deployment group show -g pki -n step-ca-infra -o tsv --query properties.outputs.caManagedIdentityClientId.value
+
+vmid=$(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
+az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
+   --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/id_rsa \
+   --target-resource-id $vmid
 
 #in the CA
 #the mi client ID
-export AZURE_CLIENT_ID=d2b056c4-c917-492a-84e9-75ce5a1c4a46
+export AZURE_CLIENT_ID=$(az deployment group show -g pki -n step-ca-infra -o tsv --query properties.outputs.caManagedIdentityClientId.value)
 
 wget https://dl.step.sm/gh-release/cli/docs-ca-install/v0.21.0/step-cli_0.21.0_amd64.deb
 sudo dpkg -i step-cli_0.21.0_amd64.deb
