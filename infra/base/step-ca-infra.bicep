@@ -18,8 +18,8 @@ param imageRecommended object
 param pkiVirtualNetworkName string
 
 param caKeyvaultName string
-@secure()
-param caSecret string
+//@secure()
+//param caSecret string
 
 param bastionName string = 'caBastion'
 param bastionSku string = 'Standard'
@@ -44,7 +44,7 @@ param caVMAdminUsername string
 
 @description('SSH Key')
 @secure()
-param caVMsshKey string
+param caVMPublicSshKey string
 
 @description('The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version.')
 param caVMOSVersion string = '18.04-LTS'
@@ -58,7 +58,7 @@ var caVMlinuxConfiguration = {
     publicKeys: [
       {
         path: '/home/${caVMAdminUsername}/.ssh/authorized_keys'
-        keyData: caVMsshKey
+        keyData: caPulicSshKey.properties.publicKey
       }
     ]
   }
@@ -192,12 +192,12 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
     tenantId: subscription().tenantId
   }
 
-  resource keyVaultSecret 'secrets@2019-09-01' = {
-    name: 'caSecret'
-    properties: {
-      value: caSecret
-    }
-  }
+  // resource keyVaultSecret 'secrets@2019-09-01' = {
+  //   name: 'caSecret'
+  //   properties: {
+  //     value: caSecret
+  //   }
+  // }
 }
 
 resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
@@ -364,6 +364,15 @@ resource stepcaImageDefinition 'Microsoft.Compute/galleries/images@2022-01-03' =
     osState: 'Generalized'
     osType: 'Linux'
     recommended: imageRecommended
+  }
+}
+
+resource caPulicSshKey 'Microsoft.Compute/sshPublicKeys@2022-03-01' = {
+  name: 'caVMSSHKey'
+  location: location
+  tags: tags
+  properties: {
+    publicKey: caVMPublicSshKey
   }
 }
 
