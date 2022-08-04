@@ -19,30 +19,45 @@ An implementation of step-ca on Azure.
   az account show -o tsv --query name
   ```
 
-1. Optionally, generate an SSH key to access the CA. If you do not, you have to bring your ssh key pair to the codespaces environment.
-
-  ```bash
-  ssh-keygen -t rsa -b 4096 -o -a 100
-  ```
+1. The automation expects your SSH public key to be present in the environment variable CA_SSH_PUBLIC_KEY. You need to manage from where you'll login to the CA and ensure the matching private key is present.
 
 1. Set the target Resource Group by configuring the environment variable AZURE_RG_NAME (default:pki).  
 Set the target Azure Region by configuring the environment variable AZURE_LOCATION (default:westeurope).  
 Set the Azure AD Application names for the deployment credential (default: pkideploy)
 Set the path to the SSH public key used to login to the CA (default: pkideploy).
 
-  ```bash
-  export AZURE_RG_NAME='pki'
-  export AZURE_LOCATION='westeurope'
-  export AAD_DEPLOY_APP_NAME='pkideploy'
-  export SSH_PUBLIC_KEY_PATH='~/.ssh/id_rsa.pub'
-  ```
+:TODO **need to move this into the template**
 
-1. Run the deployment pre-requisites script.
+1. Optionally, configure deployment defaults in infra/base/defauls.json.
+
+> Optionally, you can set these as codespaces user secrets. Codespaces will expose the necessary values in the matching environment variables. 
 
   ```bash
-  ./deploy/deploy.sh
+  [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
+  [[ -z "${AZURE_LOCATION}" ]] && export AZURE_LOCATION='westeurope'
+
+  [[ -z "${CA_SSH_PUBLIC_KEY}" ]] && export CA_SSH_PUBLIC_KEY='$(cat ~/.ssh/id_rsa.pub)'
+  [[ -z "${DB_ADMIN_PASSWORD}" ]] && export DB_ADMIN_PASSWORD='your Database admin password'
   ```
 
+1. Deploy the solution:
+
+  ```bash
+  az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION -o none
+  az deployment group create -g $AZURE_RG_NAME -o none \
+    --template-file infra/base/step-ca-infra.bicep \
+    --parameters infra/base/defaults.json \
+    --parameters caVMPublicSshKey="$CA_SSH_PUBLIC_KEY" \
+    --parameters dbLoginPassword="$DB_ADMIN_PASSWORD"
+  ```
+
+
+
+
+================
+GH workflow stuff
+
+  [[ -z "${AAD_DEPLOY_APP_NAME}" ]] && export AAD_DEPLOY_APP_NAME='pkideploy'
 1. Run the solution deployment workflow.
 
   ```bash
