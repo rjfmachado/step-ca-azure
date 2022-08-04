@@ -28,7 +28,7 @@ Set the path to the SSH public key used to login to the CA (default: pkideploy).
 
 :TODO **need to move this into the template**
 
-1. Optionally, configure deployment defaults in infra/base/defauls.json.
+1. Optionally, configure deployment defaults in infra/base/defaults.json.
 
 > Optionally, you can set these as codespaces user secrets. Codespaces will expose the necessary values in the matching environment variables. 
 
@@ -51,7 +51,15 @@ Set the path to the SSH public key used to login to the CA (default: pkideploy).
     --parameters dbLoginPassword="$DB_ADMIN_PASSWORD"
   ```
 
+1. Finally, connect to your CA via Azure Bastion
 
+```bash
+az extension add --name ssh
+vmid=$(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
+az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
+   --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/yoga \
+   --target-resource-id $vmid
+```
 
 
 ================
@@ -64,14 +72,7 @@ GH workflow stuff
   gh workflow run deploy.yml
   ```
 
-1. Finally, connect to your CA via the Jump Host
 
-```bash
-vmid=$(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
-az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
-   --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/id_rsa \
-   --target-resource-id $vmid
-```
 
 ## Requirements
 
