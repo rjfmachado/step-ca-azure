@@ -1,7 +1,3 @@
-# Create the Resource Group and the base infrastructure deployment
-az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION -o none
-az deployment group create -g $AZURE_RG_NAME --template-file infra/base/step-ca-infra.bicep --parameters infra/base/defaults.json --parameters caVMsshKey=@$SSH_PUBLIC_KEY_PATH -o none
-
 
 # # Get the current subscription id, tenant id, and Github organization and repository
 # GH_ORG=$(gh repo view --json nameWithOwner | jq .nameWithOwner | sed 's/\"//g' | cut -d'/' -f1)
