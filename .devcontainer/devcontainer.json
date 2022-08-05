@@ -1,25 +1,28 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.202.5/containers/ubuntu
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.238.1/containers/ubuntu
 {
 	"name": "Ubuntu",
-	"runArgs": [
-		"--init"
-	],
 	"build": {
 		"dockerfile": "Dockerfile",
-		// Update 'VARIANT' to pick an Ubuntu version: hirsute, focal, bionic
-		// Use hirsute or bionic on local arm64/Apple Silicon.
+		// Update 'VARIANT' to pick an Ubuntu version: jammy / ubuntu-22.04, focal / ubuntu-20.04, bionic /ubuntu-18.04
+		// Use ubuntu-22.04 or ubuntu-18.04 on local arm64/Apple Silicon.
 		"args": {
-			"VARIANT": "focal"
+			"VARIANT": "ubuntu-22.04"
 		}
 	},
-	// Set *default* container specific settings.json values on container create.
-	"settings": {},
-	// Codespaces struggles running/debugging the web app with 4gb memory, so lets explicitly require 8gb
-	"hostRequirements": {
-		"memory": "8gb"
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "uname -a",
+	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode",
+	"features": {
+		"kubectl-helm-minikube": "1.23",
+		"github-cli": "latest",
+		"azure-cli": "latest",
+		"sshd": "latest",
+		"rust": "latest"
 	},
-	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"cschleiden.vscode-github-actions",
 		"github.copilot",
@@ -35,16 +38,7 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "az bicep install && az extension add --name ssh",
+	"postCreateCommand": "az bicep install && az extension add --name ssh"
 	//"postStartCommand": "",
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "vscode",
-	"features": {
-		"kubectl-helm-minikube": "1.21",
-		"github-cli": "latest",
-		"azure-cli": "latest",
-		"powershell": "latest",
-		"terraform": "latest",
-		"sshd": "latest"
-	}
 }
