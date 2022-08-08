@@ -18,12 +18,12 @@ az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
 
 #in the CA
 #the mi client ID
-export AZURE_CLIENT_ID=$(az deployment group show -g pki -n step-ca-infra -o tsv --query properties.outputs.caManagedIdentityClientId.value)
+export AZURE_CLIENT_ID=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F' -H Metadata:true -s | jq -r .client_id)
 
-wget https://dl.step.sm/gh-release/cli/docs-ca-install/v0.21.0/step-cli_0.21.0_amd64.deb
-sudo dpkg -i step-cli_0.21.0_amd64.deb
+wget https://dl.step.sm/gh-release/cli/docs-ca-install/v0.21.0/step-ca_0.21.0_amd64.deb
+sudo dpkg -i step-ca_0.21.0_amd64.deb
 
-tep ca init --kms azurekms
+step ca init --kms azurekms
 ✔ Deployment Type: Standalone
 What would you like to name your new PKI?
 ✔ (e.g. Smallstep): testpki

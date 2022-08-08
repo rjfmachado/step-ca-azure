@@ -6,6 +6,7 @@ param tags object = {
   source: 'github.com/rjfmachado/bicepregistry/step-ca-azure'
 }
 
+param galleryDeploy bool = false
 param galleryName string
 param galleryManagedIdentityName string = 'galleryManagedIdentity'
 
@@ -24,6 +25,7 @@ param caKeyvaultName string
 param bastionName string = 'caBastion'
 param bastionSku string = 'Standard'
 
+param dbDeploy bool = false
 param dbName string
 param dbLogin string = 'cadbadmin'
 @secure()
@@ -256,7 +258,7 @@ resource keyvaultPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' =
   }
 }
 
-resource mysqlPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+resource mysqlPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (dbDeploy) {
   name: 'privatelink.mysql.database.azure.com'
   location: 'global'
   tags: tags
@@ -274,13 +276,13 @@ resource mysqlPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   }
 }
 
-resource dbManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+resource dbManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = if (dbDeploy) {
   name: dbManagedIdentityName
   location: location
   tags: tags
 }
 
-resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = {
+resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = if (dbDeploy) {
   name: dbName
   location: location
   tags: tags
@@ -300,7 +302,7 @@ resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = {
   }
 }
 
-resource gallery 'Microsoft.Compute/galleries@2022-01-03' = {
+resource gallery 'Microsoft.Compute/galleries@2022-01-03' = if (galleryDeploy) {
   name: galleryName
   location: location
   tags: tags
@@ -315,7 +317,7 @@ resource galleryManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentitie
   tags: tags
 }
 
-resource galleryImageBuilderRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' = {
+resource galleryImageBuilderRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' = if (galleryDeploy) {
   name: guid(resourceGroup().id, subscription().id, 'Image Builder Service Image Contributor')
   properties: {
     roleName: 'Image Builder Service Image Contributor'
@@ -341,7 +343,7 @@ resource galleryImageBuilderRoleDefinition 'Microsoft.Authorization/roleDefiniti
   }
 }
 
-resource galleryImageBuilderRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+resource galleryImageBuilderRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = if (galleryDeploy) {
   name: guid(resourceGroup().id, subscription().id, 'Image Builder Service Image Contributor')
   scope: gallery
   properties: {
@@ -351,7 +353,7 @@ resource galleryImageBuilderRoleAssignment 'Microsoft.Authorization/roleAssignme
   }
 }
 
-resource stepcaImageDefinition 'Microsoft.Compute/galleries/images@2022-01-03' = {
+resource stepcaImageDefinition 'Microsoft.Compute/galleries/images@2022-01-03' = if (galleryDeploy) {
   name: imageName
   location: location
   tags: tags
