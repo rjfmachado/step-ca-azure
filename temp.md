@@ -28,7 +28,7 @@ tep ca init --kms azurekms
 What would you like to name your new PKI?
 ✔ (e.g. Smallstep): testpki
 What URI would you like to use for the root certificate key?
-✔ (e.g. azurekms:name=my-root-key;vault=my-vault): azurekms:name=my-root-key;vault=ricardmakvpki1
+✔ (e.g. ): azurekms:name=my-root-key;vault=ricardmakvpki1
 What URI would you like to use for the intermediate certificate key?
 ✔ (e.g. azurekms:name=my-intermediate-key;vault=my-vault): azurekms:name=int-key;vault=ricardmakvpki1
 What DNS names or IP addresses would you like to add to your new CA?

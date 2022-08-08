@@ -20,8 +20,8 @@
 		"kubectl-helm-minikube": "1.23",
 		"github-cli": "latest",
 		"azure-cli": "latest",
-		"sshd": "latest",
-		"rust": "latest"
+		"terraform": "latest",
+		"sshd": "latest"
 	},
 	"extensions": [
 		"cschleiden.vscode-github-actions",
