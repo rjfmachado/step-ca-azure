@@ -480,6 +480,16 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
       linuxConfiguration: caVMlinuxConfiguration
     }
   }
+
+  resource runPowerShellScript 'runCommands@2022-03-01' = {
+    name: 'installjq'
+    location: location
+    properties: {
+      source: {
+        script: 'apt update && apt install -y jq'
+      }
+    }
+  }
 }
 
 resource keyvaultAdminrole 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
