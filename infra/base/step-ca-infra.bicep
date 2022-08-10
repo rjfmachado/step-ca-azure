@@ -53,7 +53,7 @@ param caVMAdminUsername string
 param caVMPublicSshKey string
 
 @description('The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version.')
-param caVMOSVersion string = '10'
+param caVMOSVersion string = '11'
 param caVMSize string = 'Standard_B2s'
 
 param caManagedIdentityName string = 'caManagedIdentity'
@@ -469,7 +469,7 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
 
       imageReference: {
         publisher: 'Debian'
-        offer: 'debian-10'
+        offer: 'debian-11'
         sku: caVMOSVersion
         version: 'latest'
       }

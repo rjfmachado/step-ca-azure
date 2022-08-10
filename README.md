@@ -56,7 +56,6 @@ Set the path to the SSH public key used to login to the CA (default: pkideploy).
 ```bash
 az extension add --name ssh && \
 [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki' && \
-vmid=$(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id) && \
 az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
    --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/yoga \
    --target-resource-id $(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
