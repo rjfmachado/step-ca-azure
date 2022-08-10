@@ -8,10 +8,10 @@
     "caVMAdminUsername": {
       "value": "stepcaadmin"
     },
-    "pkiVirtualNetworkName": {
+    "virtualNetworkName": {
       "value": "stepcadev1"
     },
-    "caKeyvaultName": {
+    "keyvaultName": {
       "value": "ricardmakvpki1"
     },
     "dbName": {

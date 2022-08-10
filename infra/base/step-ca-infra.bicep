@@ -16,12 +16,17 @@ param imageIdentifier object
 param imageGeneration string = 'V1'
 param imageRecommended object
 
-param pkiVirtualNetworkName string
+param virtualNetworkDeploy bool = true
+param virtualNetworkName string
+param virtualNetworkDNSServers array = []
 
-param caKeyvaultName string
+param keyvaultDeploy bool = true
+param keyvaultName string
 //@secure()
 //param caSecret string
 
+// Bastion host name
+param bastionDeploy bool = true
 param bastionName string = 'caBastion'
 param bastionSku string = 'Standard'
 
@@ -31,7 +36,6 @@ param dbLogin string = 'cadbadmin'
 @secure()
 param dbLoginPassword string
 param dbManagedIdentityName string = 'dbManagedIdentity'
-
 param dbSku object = {
   name: 'Standard_B2s'
   tier: 'Burstable'
@@ -41,15 +45,15 @@ param dbHighAvailability object = {
 }
 param dbVersion string = '5.7'
 
+// CA Virtual Machine Parameters
 param caVMName string
 param caVMAdminUsername string
-
 @description('SSH Key')
 @secure()
 param caVMPublicSshKey string
 
 @description('The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version.')
-param caVMOSVersion string = '18.04-LTS'
+param caVMOSVersion string = '22_04-lts-gen2'
 param caVMSize string = 'Standard_B2s'
 
 param caManagedIdentityName string = 'caManagedIdentity'
@@ -66,10 +70,13 @@ var caVMlinuxConfiguration = {
   }
 }
 
-resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
-  name: pkiVirtualNetworkName
+resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = if (virtualNetworkDeploy) {
+  name: virtualNetworkName
   location: location
   properties: {
+    dhcpOptions: {
+      dnsServers: virtualNetworkDNSServers
+    }
     addressSpace: {
       addressPrefixes: [
         '10.0.0.0/16'
@@ -128,7 +135,7 @@ resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
   }
 }
 
-resource pipBastion 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
+resource pipBastion 'Microsoft.Network/publicIPAddresses@2021-05-01' = if (bastionDeploy) {
   name: bastionName
   location: location
   tags: tags
@@ -146,7 +153,7 @@ resource pipBastion 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
   }
 }
 
-resource bastion 'Microsoft.Network/bastionHosts@2022-01-01' = {
+resource bastion 'Microsoft.Network/bastionHosts@2022-01-01' = if (bastionDeploy) {
   name: bastionName
   location: location
   tags: tags
@@ -172,8 +179,8 @@ resource bastion 'Microsoft.Network/bastionHosts@2022-01-01' = {
   }
 }
 
-resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
-  name: caKeyvaultName
+resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = if (keyvaultDeploy) {
+  name: keyvaultName
   location: location
   tags: tags
   dependsOn: [
@@ -202,7 +209,7 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
   // }
 }
 
-resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
+resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = if (keyvaultDeploy) {
   name: 'caKeyvault'
   location: location
   dependsOn: [
@@ -225,7 +232,7 @@ resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01'
     ]
   }
 
-  resource kvPrivateEndpointDnsGroup 'privateDnsZoneGroups@2021-05-01' = {
+  resource kvPrivateEndpointDnsGroup 'privateDnsZoneGroups@2021-05-01' = if (keyvaultDeploy) {
     name: 'caKeyvault'
     properties: {
       privateDnsZoneConfigs: [
@@ -240,7 +247,7 @@ resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01'
   }
 }
 
-resource keyvaultPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+resource keyvaultPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (keyvaultDeploy) {
   name: 'privatelink.vaultcore.azure.net'
   location: 'global'
   tags: tags
@@ -462,7 +469,7 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
 
       imageReference: {
         publisher: 'Canonical'
-        offer: 'UbuntuServer'
+        offer: '0001-com-ubuntu-server-jammy'
         sku: caVMOSVersion
         version: 'latest'
       }
