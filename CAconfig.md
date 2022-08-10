@@ -26,12 +26,11 @@ export AZURE_CLIENT_ID=$(curl 'http://169.254.169.254/metadata/identity/oauth2/t
 
 
 
-
 https://smallstep.com/docs/step-cli/reference/ca/init
 
 step ca init --deployment-type=standalone --name=TestPKI --dns ca.testpki.com --address=:443 --provisioner=ricardo.machado@microsoft.com --kms=azurekms --no-db
 
-step ca init --deployment-type=standalone --name=TestPKI --dns ca.testpki.com --address=:443 --provisioner=ricardo.machado@microsoft.com --kms=azurekms --no-db
+step ca init --deployment-type=standalone --name=TestPKI --dns ca.testpki.com --address=:443 --provisioner=ricardo.<machado@microsoft.com --kms=azurekms --no-db
 
 azurekms:name=rootkey;vault=ricardmakvpki1
 azurekms:name=intermediatekey;vault=ricardmakvpki1
@@ -39,7 +38,11 @@ azurekms:name=intermediatekey;vault=ricardmakvpki1
 
 1. setup the daemon
 https://smallstep.com/docs/step-ca/certificate-authority-server-production#running-step-ca-as-a-daemon
+https://gist.github.com/circa10a/e6cfc673af9282d17dfb958ef6adabeb
+//this one to set the clientid env var for the service, also check the file based auth mentioned in the install guidance.
 
+insert Environment=AZURE_CLIENT_ID=09e89594-0607-40b4-8b91-6de23544489d in 
+/etc/systemd/system/step-ca.service
 
 TODO:
 database
