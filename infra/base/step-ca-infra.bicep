@@ -53,7 +53,7 @@ param caVMAdminUsername string
 param caVMPublicSshKey string
 
 @description('The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version.')
-param caVMOSVersion string = '22_04-lts-gen2'
+param caVMOSVersion string = '10'
 param caVMSize string = 'Standard_B2s'
 
 param caManagedIdentityName string = 'caManagedIdentity'
@@ -468,8 +468,8 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
       }
 
       imageReference: {
-        publisher: 'Canonical'
-        offer: '0001-com-ubuntu-server-jammy'
+        publisher: 'Debian'
+        offer: 'debian-10'
         sku: caVMOSVersion
         version: 'latest'
       }
@@ -488,15 +488,16 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
     }
   }
 
-  resource runPowerShellScript 'runCommands@2022-03-01' = {
-    name: 'installjq'
-    location: location
-    properties: {
-      source: {
-        script: 'apt update && apt install -y jq'
-      }
-    }
-  }
+  // resource runPowerShellScript 'runCommands@2022-03-01' = {
+  //   name: 'installjq'
+  //   location: location
+  //   properties: {
+  //     source: {
+  //       script: 'apt update && apt install -y jq'
+  //     }
+  //     timeoutInSeconds: 60
+  //   }
+  // }
 }
 
 resource keyvaultAdminrole 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
