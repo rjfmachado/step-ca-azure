@@ -72,6 +72,7 @@ azurekms:name=rootkey;vault=ricardmakvpki1
 azurekms:name=intermediatekey;vault=ricardmakvpki1
 
 
+
 1. setup the daemon
 https://smallstep.com/docs/step-ca/certificate-authority-server-production#running-step-ca-as-a-daemon
 https://gist.github.com/circa10a/e6cfc673af9282d17dfb958ef6adabeb
