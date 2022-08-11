@@ -30,7 +30,7 @@ param bastionDeploy bool = true
 param bastionName string = 'caBastion'
 param bastionSku string = 'Standard'
 
-param dbDeploy bool = false
+param dbDeploy bool = true
 param dbName string
 param dbLogin string = 'cadbadmin'
 @secure()
