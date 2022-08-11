@@ -51,9 +51,18 @@ param caVMAdminUsername string
 @description('SSH Key')
 @secure()
 param caVMPublicSshKey string
+param caVMCustomData string = loadTextContent('cloudinit.yaml')
 
-@description('The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version.')
-param caVMOSVersion string = '11'
+param caSTEP_CA_VERSION string = '0.21.0'
+param caSTEP_CLI_VERSION string = '0.21.0'
+
+@description('The image reference. please select a step-ca supported OS with systemd version 245 or greater.')
+param caVMImageReference object = {
+  publisher: 'Debian'
+  offer: 'debian-11'
+  sku: '11-gen2'
+  version: 'latest'
+}
 param caVMSize string = 'Standard_B2s'
 
 param caManagedIdentityName string = 'caManagedIdentity'
@@ -69,6 +78,11 @@ var caVMlinuxConfiguration = {
     ]
   }
 }
+
+var cloudinit1 = replace(caVMCustomData, '[STEP_CA_VERSION]', caSTEP_CA_VERSION)
+var cloudinit2 = replace(cloudinit1, '[STEP_CLI_VERSION]', caSTEP_CLI_VERSION)
+var cloudinit3 = replace(cloudinit2, '[caVMAdminUsername]', caVMAdminUsername)
+var cloudinit = cloudinit3
 
 resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = if (virtualNetworkDeploy) {
   name: virtualNetworkName
@@ -467,12 +481,7 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
         createOption: 'FromImage'
       }
 
-      imageReference: {
-        publisher: 'Debian'
-        offer: 'debian-11'
-        sku: caVMOSVersion
-        version: 'latest'
-      }
+      imageReference: caVMImageReference
     }
     networkProfile: {
       networkInterfaces: [
@@ -485,6 +494,7 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
       computerName: caVMName
       adminUsername: caVMAdminUsername
       linuxConfiguration: caVMlinuxConfiguration
+      customData: base64(cloudinit)
     }
   }
 
@@ -516,3 +526,4 @@ resource cavmkeyvaultadmin 'Microsoft.Authorization/roleAssignments@2020-10-01-p
 }
 
 output caManagedIdentityClientId string = caManagedIdentity.properties.clientId
+output caCloudInit string = cloudinit

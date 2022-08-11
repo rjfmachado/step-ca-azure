@@ -9,11 +9,7 @@ https://smallstep.com/docs/step-ca/configuration
 https://smallstep.com/docs/step-ca/configuration/#azure-key-vault
 
 ```bash
-wget https://dl.step.sm/gh-release/cli/docs-ca-install/v0.21.0/step-cli_0.21.0_amd64.deb
-sudo dpkg -i step-cli_0.21.0_amd64.deb
-
-wget https://dl.step.sm/gh-release/certificates/docs-ca-install/v0.21.0/step-ca_0.21.0_amd64.deb
-sudo dpkg -i step-ca_0.21.0_amd64.deb
+run the downloadstep.sh
 ```
 
 1. Run step ca as a daemon

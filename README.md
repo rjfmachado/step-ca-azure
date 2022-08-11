@@ -19,7 +19,9 @@ An implementation of step-ca on Azure.
   az account show -o tsv --query name
   ```
 
-1. The automation expects your SSH public key to be present in the environment variable CA_SSH_PUBLIC_KEY. You need to manage from where you'll login to the CA and ensure the matching private key is present.
+1. The automation expects your SSH public key to be present in the environment variable CA_SSH_PUBLIC_KEY. You need to manage from where you'll login to the CA and ensure the matching private key is present there.
+
+1. You can also set the Database server admin password in the DB_ADMIN_PASSWORD
 
 1. Set the target Resource Group by configuring the environment variable AZURE_RG_NAME (default:pki).  
 Set the target Azure Region by configuring the environment variable AZURE_LOCATION (default:westeurope).  
@@ -32,13 +34,12 @@ Set the path to the SSH public key used to login to the CA (default: pkideploy).
 
 > Optionally, you can set these as codespaces user secrets. Codespaces will expose the necessary values in the matching environment variables. 
 
-  ```bash
-  [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
-  [[ -z "${AZURE_LOCATION}" ]] && export AZURE_LOCATION='westeurope'
-
-  [[ -z "${CA_SSH_PUBLIC_KEY}" ]] && export CA_SSH_PUBLIC_KEY='$(cat ~/.ssh/id_rsa.pub)'
-  [[ -z "${DB_ADMIN_PASSWORD}" ]] && export DB_ADMIN_PASSWORD='your Database admin password'
-  ```
+```bash
+[[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
+[[ -z "${AZURE_LOCATION}" ]] && export AZURE_LOCATION='westeurope'
+[[ -z "${CA_SSH_PUBLIC_KEY}" ]] && export CA_SSH_PUBLIC_KEY='$(cat ~/.ssh/id_rsa.pub)'
+[[ -z "${DB_ADMIN_PASSWORD}" ]] && export DB_ADMIN_PASSWORD='your Database admin password'
+```
 
 1. Deploy the solution:
 
@@ -51,11 +52,11 @@ Set the path to the SSH public key used to login to the CA (default: pkideploy).
     --parameters dbLoginPassword="$DB_ADMIN_PASSWORD"
   ```
 
-1. Finally, connect to your CA via Azure Bastion
+1. Finally, connect to your CA via Azure Bastion from a Virtual Machine with the matching private key.
 
 ```bash
-az extension add --name ssh && \
-[[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki' && \
+az extension add --name ssh
+[[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
 az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
    --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/yoga \
    --target-resource-id $(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)

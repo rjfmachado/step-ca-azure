@@ -1,0 +1,34 @@
+#cloud-config
+version: v1
+package-update: true
+package_upgrade: true
+packages:
+  - jq
+write_files:
+  - path: /etc/environment
+    content: |
+      STEP_CA_VERSION="[STEP_CA_VERSION]"
+      STEP_CLI_VERSION="[STEP_CLI_VERSION]"
+    append: true
+  - path: /opt/stepcainstall/downloadstep.sh
+    content: |
+      wget https://dl.step.sm/gh-release/cli/docs-ca-install/v[STEP_CLI_VERSION]/step-cli_[STEP_CLI_VERSION]_amd64.deb
+      sudo dpkg -i step-cli_[STEP_CLI_VERSION]_amd64.deb
+      rm -f step-cli_[STEP_CLI_VERSION]_amd64.deb
+      wget https://dl.step.sm/gh-release/certificates/docs-ca-install/v[STEP_CA_VERSION]/step-ca_[STEP_CA_VERSION]_amd64.deb
+      sudo dpkg -i step-ca_[STEP_CA_VERSION]_amd64.deb
+      rm -f step-ca_[STEP_CA_VERSION]_amd64.deb
+    permissions: "0777"
+runcmd:
+  - [
+      "wget",
+      "-nv",
+      "https://dl.step.sm/gh-release/cli/docs-ca-install/v[STEP_CLI_VERSION]/step-cli_[STEP_CLI_VERSION]_amd64.deb",
+    ]
+  - ["dpkg", "-i", "step-cli_[STEP_CLI_VERSION]_amd64.deb"]
+  - [
+      "wget",
+      "-nv",
+      "https://dl.step.sm/gh-release/certificates/docs-ca-install/v[STEP_CA_VERSION]/step-ca_[STEP_CA_VERSION]_amd64.deb",
+    ]
+  - ["dpkg", "-i", "step-ca_[STEP_CA_VERSION]_amd64.deb"]
