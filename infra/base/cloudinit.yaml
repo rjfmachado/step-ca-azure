@@ -9,6 +9,7 @@ write_files:
     content: |
       STEP_CA_VERSION="[STEP_CA_VERSION]"
       STEP_CLI_VERSION="[STEP_CLI_VERSION]"
+      AZURE_CLIENT_ID=[AZURE_CLIENT_ID]
     append: true
   - path: /opt/stepcainstall/downloadstep.sh
     content: |
