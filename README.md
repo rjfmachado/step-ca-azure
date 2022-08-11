@@ -1,96 +1,72 @@
 # step-ca-azure
 
-An implementation of step-ca on Azure.
+A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure MySQL and Managed Identities.
+
+TODO: Add a picture and broader explanation.  
+TODO: Move defaults.json into the template/ENV
+
+> The below guidance has been designed and tested on the included GitHub codespaces environment.
 
 ## Deploying the solution
 
-> Guidance/Scripts are Linux/bash and tested on the included GitHub codespaces.
-
-1. Verify the GitHub cli can access your GitHub account and project repository
-
-  ```bash
-  gh repo view
-  ```
-
 1. Login to your target subscription with Azure CLI and ensure it's the current default subscription.
 
-  ```bash
-  az login
-  az account show -o tsv --query name
-  ```
+    ```bash
+    az login
+    az account show -o tsv --query name
+    ```
 
-1. The automation expects your SSH public key to be present in the environment variable CA_SSH_PUBLIC_KEY. You need to manage from where you'll login to the CA and ensure the matching private key is present there.
+2. This guidance and provided github workflows expect the following environment variables to be present:
 
-1. You can also set the Database server admin password in the DB_ADMIN_PASSWORD
+    | Variable   |      Default value    |  Notes |
+    |-|-:|-:|
+    | AZURE_RG_NAME | | Target Resource Group |
+    | AZURE_LOCATION | westeurope | Target region for the deployment |
+    | CA_SSH_PUBLIC_KEY | | SSH Public Key |
+    | DB_ADMIN_PASSWORD | | |
 
-1. Set the target Resource Group by configuring the environment variable AZURE_RG_NAME (default:pki).  
-Set the target Azure Region by configuring the environment variable AZURE_LOCATION (default:westeurope).  
-Set the Azure AD Application names for the deployment credential (default: pkideploy)
-Set the path to the SSH public key used to login to the CA (default: pkideploy).
+    ```bash
+    [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
+    [[ -z "${AZURE_LOCATION}" ]] && export AZURE_LOCATION='westeurope'
+    [[ -z "${CA_SSH_PUBLIC_KEY}" ]] && export CA_SSH_PUBLIC_KEY='$(cat ~/.ssh/id_rsa.pub)'
+    [[ -z "${DB_ADMIN_PASSWORD}" ]] && export DB_ADMIN_PASSWORD='your Database admin password'
+    ```
 
-:TODO **need to move this into the template**
+    > Optionally, you can set these as codespaces user secrets. Codespaces will expose the necessary values in the matching environment variables.
 
-1. Optionally, configure deployment defaults in infra/base/defaults.json.
+3. Deploy the solution:
 
-> Optionally, you can set these as codespaces user secrets. Codespaces will expose the necessary values in the matching environment variables. 
-
-```bash
-[[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
-[[ -z "${AZURE_LOCATION}" ]] && export AZURE_LOCATION='westeurope'
-[[ -z "${CA_SSH_PUBLIC_KEY}" ]] && export CA_SSH_PUBLIC_KEY='$(cat ~/.ssh/id_rsa.pub)'
-[[ -z "${DB_ADMIN_PASSWORD}" ]] && export DB_ADMIN_PASSWORD='your Database admin password'
-```
-
-1. Deploy the solution:
-
-  ```bash
-  az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION -o none
-  az deployment group create -g $AZURE_RG_NAME -o none \
+    ```bash
+    az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION -o none
+    az deployment group create -g $AZURE_RG_NAME -o none \
     --template-file infra/base/step-ca-infra.bicep \
     --parameters infra/base/defaults.json \
     --parameters caVMPublicSshKey="$CA_SSH_PUBLIC_KEY" \
     --parameters dbLoginPassword="$DB_ADMIN_PASSWORD"
-  ```
+    ```
 
 1. Finally, connect to your CA via Azure Bastion from a Virtual Machine with the matching private key.
 
-```bash
-az extension add --name ssh
-[[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
-az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
-   --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/yoga \
-   --target-resource-id $(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
-```
+    ```bash
+    az extension add --name ssh
+    [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
+    az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
+    --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/yoga \
+    --target-resource-id $(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
+    ```
 
-# Configuring your CA
+## Configuring your CA
 
 Consider this guidance the minimum set of steps required to stand up step-ca in a VM in Azure, using Key Vault and MySQL Backend.
 Please refer to smallstep documentation and guidance for any configuration changes or guidance. For convenience, I'm adding here the documentation referenced by me while building this sample.
 
 1. Bootstrap with DB and Key Vault
-https://smallstep.com/docs/step-ca/installation
-https://smallstep.com/docs/step-ca/configuration
-https://smallstep.com/docs/step-ca/configuration/#azure-key-vault
-
-```bash
-run the downloadstep.sh
-```
-
-1. Run step ca as a daemon
-
-1. Running step ca in production
-https://smallstep.com/docs/step-ca/certificate-authority-server-production
-
-
-export AZURE_CLIENT_ID=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F' -H Metadata:true -s | jq -r .client_id)
-
-
-
-https://smallstep.com/docs/step-cli/reference/ca/init
+[Installation](https://smallstep.com/docs/step-ca/installation)
+[Configuration](https://smallstep.com/docs/step-ca/configuration)
+[Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)
+[step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)
 
 step ca init --deployment-type=standalone --name=TestPKI --dns ca.testpki.com --address=:443 --provisioner=ricardo.machado@microsoft.com --kms=azurekms --no-db
-
-step ca init --deployment-type=standalone --name=TestPKI --dns ca.testpki.com --address=:443 --provisioner=ricardo.<machado@microsoft.com --kms=azurekms --no-db
 
 azurekms:name=rootkey;vault=ricardmakvpki1
 azurekms:name=intermediatekey;vault=ricardmakvpki1
@@ -100,7 +76,6 @@ azurekms:name=intermediatekey;vault=ricardmakvpki1
 https://smallstep.com/docs/step-ca/certificate-authority-server-production#running-step-ca-as-a-daemon
 https://gist.github.com/circa10a/e6cfc673af9282d17dfb958ef6adabeb
 //this one to set the clientid env var for the service, also check the file based auth mentioned in the install guidance.
-
 insert Environment=AZURE_CLIENT_ID=09e89594-0607-40b4-8b91-6de23544489d in 
 /etc/systemd/system/step-ca.service
 
