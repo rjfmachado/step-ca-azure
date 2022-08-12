@@ -11,6 +11,10 @@ write_files:
       STEP_CLI_VERSION="[STEP_CLI_VERSION]"
       AZURE_CLIENT_ID=[AZURE_CLIENT_ID]
     append: true
+  - path: /etc/[caVMAdminUsername]/profile
+    content: |
+      echo "CA init and setup Scripts are present in /opt/stepcainstall"
+    append: true
   - path: /opt/stepcainstall/downloadstep.sh
     content: |
       wget https://dl.step.sm/gh-release/cli/docs-ca-install/v[STEP_CLI_VERSION]/step-cli_[STEP_CLI_VERSION]_amd64.deb

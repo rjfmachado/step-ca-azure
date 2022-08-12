@@ -518,13 +518,14 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
 
   resource caInitPassword 'extensions@2022-03-01' = {
     name: 'caInitPassword'
+    location: location
     properties: {
       publisher: 'microsoft.azure.extensions'
       type: 'CustomScript'
       typeHandlerVersion: '2.1'
       autoUpgradeMinorVersion: true
       protectedSettings: {
-        commandToExecute: 'echo ${caINIT_PASSWORD} | sudo -S echo ${1} > /opt/stepcainstall/password.txt'
+        commandToExecute: 'echo "${caINIT_PASSWORD}" > /opt/stepcainstall/password.txt'
       }
     }
   }
