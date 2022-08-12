@@ -68,6 +68,8 @@ param caVMCustomData string = loadTextContent('cloudinit.yaml')
 
 param caSTEP_CA_VERSION string = '0.21.0'
 param caSTEP_CLI_VERSION string = '0.21.0'
+@secure()
+param caINIT_PASSWORD string
 
 @description('The image reference. please select a step-ca supported OS with systemd version 245 or greater.')
 param caVMImageReference object = {
@@ -512,16 +514,18 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
     }
   }
 
-  // resource runPowerShellScript 'runCommands@2022-03-01' = {
-  //   name: 'installjq'
-  //   location: location
-  //   properties: {
-  //     source: {
-  //       script: 'apt update && apt install -y jq'
-  //     }
-  //     timeoutInSeconds: 60
-  //   }
-  // }
+  resource caInitPassword 'extensions@2022-03-01' = {
+    name: 'caInitPassword'
+    properties: {
+      publisher: 'microsoft.azure.extensions'
+      type: 'CustomScript'
+      typeHandlerVersion: '2.1'
+      autoUpgradeMinorVersion: true
+      protectedSettings: {
+        commandToExecute: 'echo ${caINIT_PASSWORD} | sudo -S echo ${1} > /opt/stepcainstall/password.txt'
+      }
+    }
+  }
 }
 
 resource keyvaultAdminrole 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {

@@ -25,7 +25,12 @@ TODO: Move defaults.json into the template/ENV
     | CA_CAVMNAME | | Virtual Machine name |
     | CA_KEYVAULTNAME | | Key Vault name - Must be unique |
     | CA_SSH_PUBLIC_KEY | | SSH Public Key |
-    | DB_ADMIN_PASSWORD | | |
+    | DB_ADMIN_PASSWORD | | Database admin user password | 
+    | CA_INIT_PASSWORD | | Parameter for step ca init --password-file contents |
+    | CA_INIT_NAME | | Parameter for step ca init --name |
+    | CA_INIT_DNS | | Parameter for step ca init --dns |
+    | CA_INIT_PORT | | Parameter for step ca init --address|
+    | CA_INIT_PROVISIONER | | Parameter for step ca init --provisioner|
 
     ```bash
     [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
@@ -69,8 +74,7 @@ Please refer to smallstep documentation and guidance for any configuration chang
 [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)
 
 ```bash
-echo  '<your key password>' > password.txt
-step ca init --deployment-type=standalone --name=TestPKI --dns ca.testpki.com --address=:443 --provisioner=ricardo.machado@microsoft.com --kms=azurekms --no-db --password-file=password.txt
+step ca init --deployment-type=standalone --name=[CA_INIT_NAME] --dns [CA_INIT_DNS] --address=[CA_INIT_PORT] --provisioner=[CA_INIT_PROVISIONER] --kms=azurekms --no-db --password-file=password.txt
 ```
 
 azurekms:name=rootkey;vault=ricardmakvpki1

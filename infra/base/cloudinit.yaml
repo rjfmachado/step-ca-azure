@@ -20,6 +20,10 @@ write_files:
       sudo dpkg -i step-ca_[STEP_CA_VERSION]_amd64.deb
       rm -f step-ca_[STEP_CA_VERSION]_amd64.deb
     permissions: "0777"
+  - path: /opt/stepcainstall/initstepca.sh
+    content: |
+      echo "Hello World!"
+    permissions: "0777"
   - path: /opt/stepcainstall/setupdaemon.sh
     content: |
       echo "Hello World!"
