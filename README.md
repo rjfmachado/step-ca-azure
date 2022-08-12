@@ -27,16 +27,13 @@ TODO: Move defaults.json into the template/ENV
     | CA_SSH_PUBLIC_KEY | | SSH Public Key |
     | DB_ADMIN_PASSWORD | | Database admin user password | 
     | CA_INIT_PASSWORD | | Parameter for step ca init --password-file contents |
-    | CA_INIT_NAME | | Parameter for step ca init --name |
-    | CA_INIT_DNS | | Parameter for step ca init --dns |
-    | CA_INIT_PORT | | Parameter for step ca init --address|
-    | CA_INIT_PROVISIONER | | Parameter for step ca init --provisioner|
+    | CA_INIT_COMMAND | | CA Initialization instructions |
+
+
+    Sample CA init for Azure Key Vault, please refer to [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init) for more information:
 
     ```bash
-    [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
-    [[ -z "${AZURE_LOCATION}" ]] && export AZURE_LOCATION='westeurope'
-    [[ -z "${CA_SSH_PUBLIC_KEY}" ]] && export CA_SSH_PUBLIC_KEY='$(cat ~/.ssh/id_rsa.pub)'
-    [[ -z "${DB_ADMIN_PASSWORD}" ]] && export DB_ADMIN_PASSWORD='your Database admin password'
+    export CA_INIT_COMMAND="step ca init --deployment-type=standalone --name=[CA_INIT_NAME] --dns=[CA_INIT_DNS] --address=[CA_INIT_PORT]--provisioner=[CA_INIT_PROVISIONER] --kms=azurekms --no-db --password-file=/opt/stepcainstall/password.txt"
     ```
 
     > Optionally, you can set these as codespaces user secrets. Codespaces will expose the necessary values in the matching environment variables.
@@ -44,12 +41,7 @@ TODO: Move defaults.json into the template/ENV
 3. Deploy the solution:
 
     ```bash
-    az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION -o none
-    az deployment group create -g $AZURE_RG_NAME -o none \
-    --template-file infra/base/step-ca-infra.bicep \
-    --parameters infra/base/defaults.json \
-    --parameters caVMPublicSshKey="$CA_SSH_PUBLIC_KEY" \
-    --parameters dbLoginPassword="$DB_ADMIN_PASSWORD"
+    ./deploy/deploy.sh
     ```
 
 1. Finally, connect to your CA via Azure Bastion from a Virtual Machine with the matching private key.
@@ -74,11 +66,12 @@ Please refer to smallstep documentation and guidance for any configuration chang
 [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)
 
 ```bash
-step ca init --deployment-type=standalone --name=[CA_INIT_NAME] --dns [CA_INIT_DNS] --address=[CA_INIT_PORT] --provisioner=[CA_INIT_PROVISIONER] --kms=azurekms --no-db --password-file=password.txt
+/opt/
 ```
 
-azurekms:name=rootkey;vault=ricardmakvpki1
-azurekms:name=intermediatekey;vault=ricardmakvpki1
+>the schema for the keys is the following:
+>azurekms:name=rootkey;vault=[CA_KEYVAULTNAME]
+>azurekms:name=intermediatekey;vault=[CA_KEYVAULTNAME]
 
 
 

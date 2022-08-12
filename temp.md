@@ -1,3 +1,6 @@
+step ca init --deployment-type=standalone --name=TestPKI --dns ca.testpki.com --address=:443 --provisioner=ricardo.machado@microsoft.com --kms=azurekms --no-db
+
+
 export AZURE_RG_NAME='pki'
 export AZURE_LOCATION='westeurope'
 export AAD_DEPLOY_APP_NAME='pkideploy'

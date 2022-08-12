@@ -68,6 +68,7 @@ param caVMCustomData string = loadTextContent('cloudinit.yaml')
 
 param caSTEP_CA_VERSION string = '0.21.0'
 param caSTEP_CLI_VERSION string = '0.21.0'
+param caINIT_COMMAND string
 @secure()
 param caINIT_PASSWORD string
 
@@ -98,7 +99,8 @@ var cloudinit1 = replace(caVMCustomData, '[STEP_CA_VERSION]', caSTEP_CA_VERSION)
 var cloudinit2 = replace(cloudinit1, '[STEP_CLI_VERSION]', caSTEP_CLI_VERSION)
 var cloudinit3 = replace(cloudinit2, '[caVMAdminUsername]', caVMAdminUsername)
 var cloudinit4 = replace(cloudinit3, '[AZURE_CLIENT_ID]', caManagedIdentity.properties.clientId)
-var cloudinit = cloudinit4
+var cloudinit5 = replace(cloudinit4, '[STEP_CA_INIT_COMMAND]', caINIT_COMMAND)
+var cloudinit = cloudinit5
 
 resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = if (virtualNetworkDeploy) {
   name: virtualNetworkName
