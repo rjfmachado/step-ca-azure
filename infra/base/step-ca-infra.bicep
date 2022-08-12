@@ -7,17 +7,30 @@ param tags object = {
 }
 
 param galleryDeploy bool = false
-param galleryName string
+param galleryName string = 'stepca'
 param galleryManagedIdentityName string = 'galleryManagedIdentity'
 
 param imageName string = 'stepca'
 param imageDescription string = 'step-ca on ubuntu linux'
-param imageIdentifier object
-param imageGeneration string = 'V1'
-param imageRecommended object
+param imageIdentifier object = {
+  publisher: 'sample'
+  offer: 'step-ca'
+  sku: 'standalone'
+}
+param imageGeneration string = 'V2'
+param imageRecommended object = {
+  memory: {
+    max: 32768
+    min: 2048
+  }
+  vCPUs: {
+    max: 16
+    min: 2
+  }
+}
 
 param virtualNetworkDeploy bool = true
-param virtualNetworkName string
+param virtualNetworkName string = 'stepca'
 param virtualNetworkDNSServers array = []
 
 param keyvaultDeploy bool = true
@@ -30,8 +43,8 @@ param bastionDeploy bool = true
 param bastionName string = 'caBastion'
 param bastionSku string = 'Standard'
 
-param dbDeploy bool = true
-param dbName string
+param dbDeploy bool = false
+param dbName string = 'stepca'
 param dbLogin string = 'cadbadmin'
 @secure()
 param dbLoginPassword string
@@ -47,7 +60,7 @@ param dbVersion string = '5.7'
 
 // CA Virtual Machine Parameters
 param caVMName string
-param caVMAdminUsername string
+param caVMAdminUsername string = 'stepcaadmin'
 @description('SSH Key')
 @secure()
 param caVMPublicSshKey string

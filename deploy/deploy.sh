@@ -1,3 +1,15 @@
+[[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
+[[ -z "${AZURE_LOCATION}" ]] && export AZURE_LOCATION='westeurope'
+[[ -z "${CA_SSH_PUBLIC_KEY}" ]] && export CA_SSH_PUBLIC_KEY='$(cat ~/.ssh/id_rsa.pub)'
+[[ -z "${DB_ADMIN_PASSWORD}" ]] && export DB_ADMIN_PASSWORD='your Database admin password'
+
+az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION -o none
+az deployment group create -g $AZURE_RG_NAME -o none \
+  --template-file infra/base/step-ca-infra.bicep \
+  --parameters caVMName="$CA_CAVMNAME" \
+  --parameters keyvaultName="$CA_KEYVAULTNAME" \
+  --parameters caVMPublicSshKey="$CA_SSH_PUBLIC_KEY" \
+  --parameters dbLoginPassword="$DB_ADMIN_PASSWORD"
 
 # # Get the current subscription id, tenant id, and Github organization and repository
 # GH_ORG=$(gh repo view --json nameWithOwner | jq .nameWithOwner | sed 's/\"//g' | cut -d'/' -f1)

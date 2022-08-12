@@ -22,6 +22,8 @@ TODO: Move defaults.json into the template/ENV
     |-|-:|-:|
     | AZURE_RG_NAME | | Target Resource Group |
     | AZURE_LOCATION | westeurope | Target region for the deployment |
+    | CA_CAVMNAME | | Virtual Machine name |
+    | CA_KEYVAULTNAME | | Key Vault name - Must be unique |
     | CA_SSH_PUBLIC_KEY | | SSH Public Key |
     | DB_ADMIN_PASSWORD | | |
 
@@ -51,7 +53,7 @@ TODO: Move defaults.json into the template/ENV
     az extension add --name ssh
     [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
     az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
-    --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/yoga \
+    --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/id_rsa \
     --target-resource-id $(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
     ```
 
@@ -66,7 +68,10 @@ Please refer to smallstep documentation and guidance for any configuration chang
 [Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)
 [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)
 
-step ca init --deployment-type=standalone --name=TestPKI --dns ca.testpki.com --address=:443 --provisioner=ricardo.machado@microsoft.com --kms=azurekms --no-db
+```bash
+echo  '<your key password>' > password.txt
+step ca init --deployment-type=standalone --name=TestPKI --dns ca.testpki.com --address=:443 --provisioner=ricardo.machado@microsoft.com --kms=azurekms --no-db --password-file=password.txt
+```
 
 azurekms:name=rootkey;vault=ricardmakvpki1
 azurekms:name=intermediatekey;vault=ricardmakvpki1
