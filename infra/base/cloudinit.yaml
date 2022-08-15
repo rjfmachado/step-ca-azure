@@ -31,9 +31,6 @@ write_files:
       echo "Intermediate key URI: azurekms:name=[CA_INT_KEY_NAME];vault=[CA_KEYVAULTNAME]"
       echo ""
       [STEP_CA_INIT_COMMAND]
-    permissions: "0777"
-  - path: /opt/stepcainstall/setupdaemon.sh
-    content: |
       sudo useradd --system --home /etc/step-ca --shell /bin/false step
       sudo setcap CAP_NET_BIND_SERVICE=+eip $(which step-ca)
       sudo mv $(step path) /etc/step-ca
@@ -41,6 +38,10 @@ write_files:
       sudo chown -R step:step /etc/step-ca
       sudo sed -i 's|/home/stepcaadmin/.step|/etc/step-ca|g' /etc/step-ca/config/defaults.json /etc/step-ca/config/ca.json
       sudo systemctl daemon-reload
+      sudo systemctl enable --now step-ca
+      sleep 3
+      journalctl --unit=step-ca
+      #rm -rf /opt/stepcainstall
     permissions: "0777"
   - path: /etc/systemd/system/step-ca.service
     permissions: "0644"

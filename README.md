@@ -43,7 +43,6 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
     ./deploy/deploy.sh
     ```
 
-
 ## Initializing your CA
 
 Connect to your CA via Azure Bastion from a Virtual Machine with the matching private key. Replace the appropriate parameters.
@@ -112,11 +111,13 @@ https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management
 
 ## Backlog
 
+- [ ] Review public access/firewall for services behind Private Endpoint 
+- [ ] Review Key Vault RBAC
 - [ ] Add MySQL as Database
 - [ ] Add High Availability to MySQL  
 - [ ] Add High Availability to step-ca  
 - [ ] Add VMSS base image  
-- [ ] Review public access/firewall for services behind Private Endpoint  
+ 
 - [ ] Try Mariner 2.0  
 - [x] Move to Generation 2 Virtual Machines  
 - [ ] Add support for Managed HSM and Dedicated HSM for CA secrets  
