@@ -36,7 +36,7 @@ write_files:
       sudo mv $(step path) /etc/step-ca
       sudo cp /opt/stepcainstall/password.txt /etc/step-ca/password.txt
       sudo chown -R step:step /etc/step-ca
-      sudo sed -i 's|/home/stepcaadmin/.step|/etc/step-ca|g' /etc/step-ca/config/defaults.json /etc/step-ca/config/ca.json
+      sudo sed -i 's|/home/[caVMAdminUsername]/.step|/etc/step-ca|g' /etc/step-ca/config/defaults.json /etc/step-ca/config/ca.json
       sudo systemctl daemon-reload
       sudo systemctl enable --now step-ca
       sleep 3
