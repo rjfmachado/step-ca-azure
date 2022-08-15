@@ -450,7 +450,7 @@ resource cavmnic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
   }
 }
 
-resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2022-01-01' = {
+resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
   name: '${caVMName}-nsg'
   location: location
   properties: {
