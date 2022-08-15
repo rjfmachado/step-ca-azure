@@ -9,7 +9,7 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
 - [ ] Automate the configuration of the service [Support root/intermediate key URNs to be passed as parameters when using --kms=azurekms](https://github.com/smallstep/cli/issues/721)
 - [ ] Review public access/firewall for services behind Private Endpoint 
 - [ ] Review Key Vault RBAC for minimum rights required
-- [ ] Review Step provisioners and Provisioner management
+- [ ] Review Step provisioners and Provisioner management <https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management>
 - [ ] Add MySQL as Database
 - [ ] Test Azure Managed HSM and Azure Dedicated HSM
 - [ ] Add High Availability to MySQL  
@@ -89,11 +89,6 @@ Your [CA_INIT_COMMAND] and [CA_INIT_PASSWORD] have been placed in /opt/stepcains
 >the schema for the keys is the following:  
 >azurekms:name=rootkey;vault=[CA_KEYVAULTNAME]  
 >azurekms:name=intermediatekey;vault=[CA_KEYVAULTNAME]
-
-
-TODO:
-https://github.com/smallstep/step-kms-plugin
-https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management
 
 ## Requirements
 
