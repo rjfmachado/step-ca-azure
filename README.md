@@ -77,6 +77,7 @@ Your [CA_INIT_COMMAND] and [CA_INIT_PASSWORD] have been placed in /opt/stepcains
 >azurekms:name=rootkey;vault=[CA_KEYVAULTNAME]  
 >azurekms:name=intermediatekey;vault=[CA_KEYVAULTNAME]
 
+https://github.com/smallstep/cli/issues/721
 
 1. setup the daemon
 https://smallstep.com/docs/step-ca/certificate-authority-server-production#running-step-ca-as-a-daemon

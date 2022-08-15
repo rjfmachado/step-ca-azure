@@ -245,7 +245,7 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2022-07-01' = if (keyvaultDeploy)
   // }
 }
 
-resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2022-01-01' = if (keyvaultDeploy) {
+resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-08-01' = if (keyvaultDeploy) {
   name: 'caKeyvault'
   location: location
   dependsOn: [
@@ -535,7 +535,7 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
       //   keyVault: {
       //     id: caKeyvault.id
       //   }
-      //   keyName: 'caSecret'
+      //   "secretUrl":
       // }
     }
   }
