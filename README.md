@@ -1,8 +1,25 @@
-# step-ca-azure
+# step CA on Azure
 
-A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure MySQL and Managed Identities.
+A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure MySQL (soon) and Managed Identities.
 
 > The below guidance has been designed and tested on the included GitHub codespaces environment.
+
+## Backlog
+
+- [ ] Automate the configuration of the service [Support root/intermediate key URNs to be passed as parameters when using --kms=azurekms](https://github.com/smallstep/cli/issues/721)
+- [ ] Review public access/firewall for services behind Private Endpoint 
+- [ ] Review Key Vault RBAC for minimum rights required
+- [ ] Review Step provisioners and Provisioner management
+- [ ] Add MySQL as Database
+- [ ] Test Azure Managed HSM and Azure Dedicated HSM
+- [ ] Add High Availability to MySQL  
+- [ ] Add High Availability to step-ca  
+- [ ] Add VMSS base image
+ 
+- [ ] Try Mariner 2.0  
+- [x] Move to Generation 2 Virtual Machines  
+- [ ] Add support for Managed HSM and Dedicated HSM for CA secrets  
+- [ ] Add deploy to azure experience <https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173>
 
 ## Deploying the solution
 
@@ -13,7 +30,7 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
     az account show -o tsv --query name
     ```
 
-1. This guidance and provided github workflows expect the following environment variables to be present:
+1. This guidance and provided github workflows (soon) expect the following environment variables to be present:
 
     | Variable   |      Default value    |  Notes |
     |-|-:|-:|
@@ -25,14 +42,12 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
     | DB_ADMIN_PASSWORD | | Database admin user password | 
     | CA_INIT_PASSWORD | | Parameter for step ca init --password-file contents |
     | CA_INIT_COMMAND | | CA Initialization instructions |
-    | CA_PORT | | CA Service Port, must match the specification in the CA init command, defaults to 443 |
 
-
-    Sample CA init for Azure Key Vault, please refer to [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init) for more information:
-
-    Variables can be exposed to the deployment script in the shell, via codespaces secrets if you use the provided codespaces container or via repository secrets if you use the provided deployment workflows (not there yet). For example:
+    The repo provides a sample standalone CA init for Azure Key Vault, please refer to [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init) for more information.
+    Variables can be exposed to the deployment script in the shell, via codespaces secrets if you use the provided codespaces container or via repository secrets if you use the provided deployment workflows (soon). For example:
 
     ```bash
+    #Example variables, replace values in []
     export CA_INIT_COMMAND="step ca init --deployment-type=standalone --name=[CA_INIT_NAME] --dns=[CA_INIT_DNS] --address=[CA_INIT_PORT]--provisioner=[CA_INIT_PROVISIONER] --kms=azurekms --no-db --password-file=/opt/stepcainstall/password.txt"
     export CA_CAVMNAME="myca"
     export AZURE_LOCATION="westeurope"
@@ -58,7 +73,7 @@ Connect to your CA via Azure Bastion from a Virtual Machine with the matching pr
 
 ## Configuring your CA
 
-Consider this guidance the minimum set of steps required to stand up step-ca in a VM in Azure, using Key Vault and MySQL Backend.
+Consider this guidance the minimum set of steps required to stand up standalone step-ca in a VM in Azure, using Key Vault and MySQL Backend (soon).
 Please refer to smallstep documentation and guidance for any configuration changes or guidance. For convenience, I'm adding here the documentation referenced by me while building this sample.
 
 1. Bootstrap with DB and Key Vault
@@ -67,7 +82,7 @@ Please refer to smallstep documentation and guidance for any configuration chang
 [Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)
 [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)
 
-Your [CA_INIT_COMMAND] and [CA_INIT_PASSWORD] have been placed in /opt/stepcainstall/ as initstepca.sh and password.txt. You can run the script to initialize your CA.
+Your [CA_INIT_COMMAND] and [CA_INIT_PASSWORD] have been placed in /opt/stepcainstall/ as initstepca.sh and password.txt. You can run the script to initialize your CA and configure the step-ca daemon.
 
 ```bash
 /opt/stepcainstall/initstepca.sh
@@ -77,20 +92,15 @@ Your [CA_INIT_COMMAND] and [CA_INIT_PASSWORD] have been placed in /opt/stepcains
 >azurekms:name=rootkey;vault=[CA_KEYVAULTNAME]  
 >azurekms:name=intermediatekey;vault=[CA_KEYVAULTNAME]
 
-https://github.com/smallstep/cli/issues/721
-
-1. setup the daemon
-https://smallstep.com/docs/step-ca/certificate-authority-server-production#running-step-ca-as-a-daemon
-insert Environment=AZURE_CLIENT_ID=<guid> in /etc/systemd/system/step-ca.service
 
 TODO:
 https://github.com/smallstep/step-kms-plugin
-https://raw.githubusercontent.com/smallstep/certificates/master/examples/pki/config/ca.json
 https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management
 
 ## Requirements
 
-- jq
+Note: these are included in the provide dev container/codespaces.
+
 - [GitHub CLI](https://cli.github.com/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
@@ -110,16 +120,3 @@ https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management
 <https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics#3-confirm-that-the-key-vault-firewall-is-properly-configured>  
 <https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-troubleshoot>  
 
-## Backlog
-
-- [ ] Review public access/firewall for services behind Private Endpoint 
-- [ ] Review Key Vault RBAC
-- [ ] Add MySQL as Database
-- [ ] Add High Availability to MySQL  
-- [ ] Add High Availability to step-ca  
-- [ ] Add VMSS base image  
- 
-- [ ] Try Mariner 2.0  
-- [x] Move to Generation 2 Virtual Machines  
-- [ ] Add support for Managed HSM and Dedicated HSM for CA secrets  
-- [ ] Add deploy to azure experience <https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173>

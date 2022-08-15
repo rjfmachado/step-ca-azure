@@ -246,7 +246,7 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2022-07-01' = if (keyvaultDeploy)
   // }
 }
 
-resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-08-01' = if (keyvaultDeploy) {
+resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-03-01' = if (keyvaultDeploy) {
   name: 'caKeyvault'
   location: location
   dependsOn: [
