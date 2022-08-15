@@ -69,8 +69,6 @@ Connect to your CA via Azure Bastion from a Virtual Machine with the matching pr
     --target-resource-id $(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
     ```
 
-## Configuring your CA
-
 Consider this guidance the minimum set of steps required to stand up standalone step-ca in a VM in Azure, using Key Vault and MySQL Backend (soon).
 Please refer to smallstep documentation and guidance for any configuration changes or guidance. For convenience, I'm adding here the documentation referenced by me while building this sample.
 
