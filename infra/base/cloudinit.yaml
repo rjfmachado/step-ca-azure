@@ -39,8 +39,7 @@ write_files:
       sudo sed -i 's|/home/[caVMAdminUsername]/.step|/etc/step-ca|g' /etc/step-ca/config/defaults.json /etc/step-ca/config/ca.json
       sudo systemctl daemon-reload
       sudo systemctl enable --now step-ca
-      sleep 3
-      journalctl --unit=step-ca
+      echo "check service status: systemctl status step-ca"
     permissions: "0777"
   - path: /etc/systemd/system/step-ca.service
     permissions: "0644"
