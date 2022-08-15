@@ -236,7 +236,7 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = if (keyvaul
   // resource keyVaultSecret 'secrets@2019-09-01' = {
   //   name: 'caSecret'
   //   properties: {
-  //     value: caSecret
+  //     value: caINIT_PASSWORD
   //   }
   // }
 }
@@ -527,6 +527,12 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
       protectedSettings: {
         commandToExecute: 'echo "${caINIT_PASSWORD}" > /opt/stepcainstall/password.txt'
       }
+      // protectedSettingsFromKeyVault: {
+      //   keyVault: {
+      //     id: caKeyvault.id
+      //   }
+      //   keyName: 'caSecret'
+      // }
     }
   }
 }

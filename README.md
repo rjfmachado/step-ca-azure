@@ -2,9 +2,6 @@
 
 A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure MySQL and Managed Identities.
 
-TODO: Add a picture and broader explanation.  
-TODO: Move defaults.json into the template/ENV
-
 > The below guidance has been designed and tested on the included GitHub codespaces environment.
 
 ## Deploying the solution
@@ -16,7 +13,7 @@ TODO: Move defaults.json into the template/ENV
     az account show -o tsv --query name
     ```
 
-2. This guidance and provided github workflows expect the following environment variables to be present:
+1. This guidance and provided github workflows expect the following environment variables to be present:
 
     | Variable   |      Default value    |  Notes |
     |-|-:|-:|
@@ -32,23 +29,28 @@ TODO: Move defaults.json into the template/ENV
 
     Sample CA init for Azure Key Vault, please refer to [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init) for more information:
 
+    Variables can be exposed to the deployment script in the shell, via codespaces secrets if you use the provided codespaces container or via repository secrets if you use the provided deployment workflows. For example:
+
     ```bash
     export CA_INIT_COMMAND="step ca init --deployment-type=standalone --name=[CA_INIT_NAME] --dns=[CA_INIT_DNS] --address=[CA_INIT_PORT]--provisioner=[CA_INIT_PROVISIONER] --kms=azurekms --no-db --password-file=/opt/stepcainstall/password.txt"
+    export CA_CAVMNAME="myca"
+    export AZURE_LOCATION="westeurope"
     ```
 
-    > Optionally, you can set these as codespaces user secrets. Codespaces will expose the necessary values in the matching environment variables.
-
-3. Deploy the solution:
+    Run the deployment script after setting all the required variables.
 
     ```bash
     ./deploy/deploy.sh
     ```
 
-1. Finally, connect to your CA via Azure Bastion from a Virtual Machine with the matching private key.
+
+## Initializing your CA
+
+Connect to your CA via Azure Bastion from a Virtual Machine with the matching private key. Replace the appropriate parameters.
 
     ```bash
     az extension add --name ssh
-    [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME='pki'
+    [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME="pki"
     az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
     --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/id_rsa \
     --target-resource-id $(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
