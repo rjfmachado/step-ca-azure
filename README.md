@@ -29,7 +29,7 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
 
     Sample CA init for Azure Key Vault, please refer to [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init) for more information:
 
-    Variables can be exposed to the deployment script in the shell, via codespaces secrets if you use the provided codespaces container or via repository secrets if you use the provided deployment workflows. For example:
+    Variables can be exposed to the deployment script in the shell, via codespaces secrets if you use the provided codespaces container or via repository secrets if you use the provided deployment workflows (not there yet). For example:
 
     ```bash
     export CA_INIT_COMMAND="step ca init --deployment-type=standalone --name=[CA_INIT_NAME] --dns=[CA_INIT_DNS] --address=[CA_INIT_PORT]--provisioner=[CA_INIT_PROVISIONER] --kms=azurekms --no-db --password-file=/opt/stepcainstall/password.txt"
@@ -67,41 +67,25 @@ Please refer to smallstep documentation and guidance for any configuration chang
 [Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)
 [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)
 
+Your [CA_INIT_COMMAND] and [CA_INIT_PASSWORD] have been placed in /opt/stepcainstall/ as initstepca.sh and password.txt. You can run the script to initialize your CA.
+
 ```bash
-/opt/
+/opt/stepcainstall/initstepca.sh
 ```
 
->the schema for the keys is the following:
->azurekms:name=rootkey;vault=[CA_KEYVAULTNAME]
+>the schema for the keys is the following:  
+>azurekms:name=rootkey;vault=[CA_KEYVAULTNAME]  
 >azurekms:name=intermediatekey;vault=[CA_KEYVAULTNAME]
-
 
 
 1. setup the daemon
 https://smallstep.com/docs/step-ca/certificate-authority-server-production#running-step-ca-as-a-daemon
-https://gist.github.com/circa10a/e6cfc673af9282d17dfb958ef6adabeb
-//this one to set the clientid env var for the service, also check the file based auth mentioned in the install guidance.
-insert Environment=AZURE_CLIENT_ID=09e89594-0607-40b4-8b91-6de23544489d in 
-/etc/systemd/system/step-ca.service
+insert Environment=AZURE_CLIENT_ID=<guid> in /etc/systemd/system/step-ca.service
 
 TODO:
-database
 https://github.com/smallstep/step-kms-plugin
 https://raw.githubusercontent.com/smallstep/certificates/master/examples/pki/config/ca.json
 https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management
-
-
-================
-GH workflow stuff
-
-  [[ -z "${AAD_DEPLOY_APP_NAME}" ]] && export AAD_DEPLOY_APP_NAME='pkideploy'
-1. Run the solution deployment workflow.
-
-  ```bash
-  gh workflow run deploy.yml
-  ```
-
-
 
 ## Requirements
 
@@ -111,27 +95,28 @@ GH workflow stuff
 
 ## Documentation
 
-<https://github.com/wasabii/step-ca-azure>
-<https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/>
-<https://github.com/smallstep/certificates>
-<https://smallstep.com/docs/step-ca/provisioners>
-<https://artifacthub.io/packages/helm/smallstep/step-certificates>
-<https://hub.docker.com/r/smallstep/step-ca>
-<https://github.com/smallstep/autocert>
+<https://github.com/wasabii/step-ca-azure>  
+<https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/>  
+<https://github.com/smallstep/certificates>  
+<https://smallstep.com/docs/step-ca/provisioners>  
+<https://artifacthub.io/packages/helm/smallstep/step-certificates>  
+<https://hub.docker.com/r/smallstep/step-ca>  
+<https://github.com/smallstep/autocert>  
 
-<https://smallstep.com/docs/design-document>
-<https://smallstep.com/docs/step-ca/certificate-authority-server-production/#load-balancing-or-proxying-step-ca-traffic>
-<https://smallstep.com/docs/step-ca/integrations>
-<https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics#3-confirm-that-the-key-vault-firewall-is-properly-configured>
-<https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-troubleshoot>
+<https://smallstep.com/docs/design-document>  
+<https://smallstep.com/docs/step-ca/certificate-authority-server-production/#load-balancing-or-proxying-step-ca-traffic>  
+<https://smallstep.com/docs/step-ca/integrations>  
+<https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics#3-confirm-that-the-key-vault-firewall-is-properly-configured>  
+<https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-troubleshoot>  
 
 ## Backlog
 
+- [ ] Add MySQL as Database
 - [ ] Add High Availability to MySQL  
 - [ ] Add High Availability to step-ca  
 - [ ] Add VMSS base image  
 - [ ] Review public access/firewall for services behind Private Endpoint  
 - [ ] Try Mariner 2.0  
-- [ ] Move to Generation 2 Virtual Machines  
+- [x] Move to Generation 2 Virtual Machines  
 - [ ] Add support for Managed HSM and Dedicated HSM for CA secrets  
-- [ ] Add deploy to azure https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173
+- [ ] Add deploy to azure experience <https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173>

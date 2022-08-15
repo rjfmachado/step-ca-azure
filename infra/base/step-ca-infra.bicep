@@ -65,7 +65,8 @@ param caVMAdminUsername string = 'stepcaadmin'
 @secure()
 param caVMPublicSshKey string
 param caVMCustomData string = loadTextContent('cloudinit.yaml')
-
+param caRootKeyName string = 'caRootKey'
+param caIntermediateKeyName string = 'caIntermediateKey'
 param caSTEP_CA_VERSION string = '0.21.0'
 param caSTEP_CLI_VERSION string = '0.21.0'
 param caINIT_COMMAND string
@@ -100,9 +101,12 @@ var cloudinit2 = replace(cloudinit1, '[STEP_CLI_VERSION]', caSTEP_CLI_VERSION)
 var cloudinit3 = replace(cloudinit2, '[caVMAdminUsername]', caVMAdminUsername)
 var cloudinit4 = replace(cloudinit3, '[AZURE_CLIENT_ID]', caManagedIdentity.properties.clientId)
 var cloudinit5 = replace(cloudinit4, '[STEP_CA_INIT_COMMAND]', caINIT_COMMAND)
-var cloudinit = cloudinit5
+var cloudinit6 = replace(cloudinit5, '[CA_ROOT_KEY_NAME]', caRootKeyName)
+var cloudinit7 = replace(cloudinit6, '[CA_INT_KEY_NAME]', caIntermediateKeyName)
+var cloudinit8 = replace(cloudinit7, '[CA_KEYVAULTNAME]', keyvaultName)
+var cloudinit = cloudinit8
 
-resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = if (virtualNetworkDeploy) {
+resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (virtualNetworkDeploy) {
   name: virtualNetworkName
   location: location
   properties: {
@@ -167,7 +171,7 @@ resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = if (
   }
 }
 
-resource pipBastion 'Microsoft.Network/publicIPAddresses@2021-05-01' = if (bastionDeploy) {
+resource pipBastion 'Microsoft.Network/publicIPAddresses@2022-01-01' = if (bastionDeploy) {
   name: bastionName
   location: location
   tags: tags
@@ -211,7 +215,7 @@ resource bastion 'Microsoft.Network/bastionHosts@2022-01-01' = if (bastionDeploy
   }
 }
 
-resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = if (keyvaultDeploy) {
+resource caKeyvault 'Microsoft.KeyVault/vaults@2022-07-01' = if (keyvaultDeploy) {
   name: keyvaultName
   location: location
   tags: tags
@@ -241,7 +245,7 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = if (keyvaul
   // }
 }
 
-resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = if (keyvaultDeploy) {
+resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2022-01-01' = if (keyvaultDeploy) {
   name: 'caKeyvault'
   location: location
   dependsOn: [
@@ -423,7 +427,7 @@ resource caManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@201
   tags: tags
 }
 
-resource cavmnic 'Microsoft.Network/networkInterfaces@2021-05-01' = {
+resource cavmnic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
   name: '${caVMName}-nic'
   location: location
   tags: tags
@@ -445,7 +449,7 @@ resource cavmnic 'Microsoft.Network/networkInterfaces@2021-05-01' = {
   }
 }
 
-resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
+resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2022-01-01' = {
   name: '${caVMName}-nsg'
   location: location
   properties: {
@@ -473,7 +477,7 @@ resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
           sourceAddressPrefix: '*'
           sourcePortRange: '*'
           destinationAddressPrefix: '*'
-          destinationPortRange: '9000'
+          destinationPortRange: '443'
         }
       }
     ]
