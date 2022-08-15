@@ -64,6 +64,7 @@ param caVMAdminUsername string = 'stepcaadmin'
 @description('SSH Key')
 @secure()
 param caVMPublicSshKey string
+param caPort int = 443
 param caVMCustomData string = loadTextContent('cloudinit.yaml')
 param caRootKeyName string = 'caRootKey'
 param caIntermediateKeyName string = 'caIntermediateKey'
@@ -477,7 +478,7 @@ resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2022-01-01' = {
           sourceAddressPrefix: '*'
           sourcePortRange: '*'
           destinationAddressPrefix: '*'
-          destinationPortRange: '443'
+          destinationPortRange: '${caPort}'
         }
       }
     ]

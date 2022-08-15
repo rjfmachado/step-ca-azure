@@ -25,6 +25,7 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
     | DB_ADMIN_PASSWORD | | Database admin user password | 
     | CA_INIT_PASSWORD | | Parameter for step ca init --password-file contents |
     | CA_INIT_COMMAND | | CA Initialization instructions |
+    | CA_PORT | | CA Service Port, must match the specification in the CA init command, defaults to 443 |
 
 
     Sample CA init for Azure Key Vault, please refer to [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init) for more information:
