@@ -41,7 +41,6 @@ write_files:
       sudo systemctl enable --now step-ca
       sleep 3
       journalctl --unit=step-ca
-      #rm -rf /opt/stepcainstall
     permissions: "0777"
   - path: /etc/systemd/system/step-ca.service
     permissions: "0644"
