@@ -61,13 +61,13 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
 
 Connect to your CA via Azure Bastion from a Virtual Machine with the matching private key. Replace the appropriate parameters.
 
-    ```bash
-    az extension add --name ssh
-    [[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME="pki"
-    az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
-    --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/id_rsa \
-    --target-resource-id $(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
-    ```
+```bash
+az extension add --name ssh
+[[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME="pki"
+az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
+  --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/id_rsa \
+  --target-resource-id $(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
+```
 
 Consider this guidance the minimum set of steps required to stand up standalone step-ca in a VM in Azure, using Key Vault and MySQL Backend (soon).
 Please refer to smallstep documentation and guidance for any configuration changes or guidance. For convenience, I'm adding here the documentation referenced by me while building this sample.
