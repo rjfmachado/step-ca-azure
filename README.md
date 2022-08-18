@@ -73,6 +73,7 @@ Consider this guidance the minimum set of steps required to stand up standalone 
 Please refer to smallstep documentation and guidance for any configuration changes or guidance. For convenience, I'm adding here the documentation referenced by me while building this sample.
 
 1. Bootstrap with DB and Key Vault
+
 [Installation](https://smallstep.com/docs/step-ca/installation)  
 [Configuration](https://smallstep.com/docs/step-ca/configuration)  
 [Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)  
