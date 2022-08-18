@@ -7,6 +7,7 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
 ## Backlog
 
 - [ ] Automate the configuration of the service [Support root/intermediate key URNs to be passed as parameters when using --kms=azurekms](https://github.com/smallstep/cli/issues/721)
+- [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
 - [ ] Review public access/firewall for services behind Private Endpoint 
 - [ ] Review Key Vault RBAC for minimum rights required
 - [ ] Review Step provisioners and Provisioner management <https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management>
@@ -15,7 +16,6 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
 - [ ] Add High Availability to MySQL  
 - [ ] Add High Availability to step-ca  
 - [ ] Add VMSS base image
-- [ ] Add support for Managed HSM and Dedicated HSM for CA secrets  
 - [ ] Add deploy to azure experience <https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173>
 - [ ] SSH and Azure AD SSO <https://smallstep.com/blog/diy-single-sign-on-for-ssh/>
 
@@ -73,10 +73,10 @@ Consider this guidance the minimum set of steps required to stand up standalone 
 Please refer to smallstep documentation and guidance for any configuration changes or guidance. For convenience, I'm adding here the documentation referenced by me while building this sample.
 
 1. Bootstrap with DB and Key Vault
-[Installation](https://smallstep.com/docs/step-ca/installation)
-[Configuration](https://smallstep.com/docs/step-ca/configuration)
-[Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)
-[step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)
+[Installation](https://smallstep.com/docs/step-ca/installation)  
+[Configuration](https://smallstep.com/docs/step-ca/configuration)  
+[Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)  
+[step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)  
 
 Your [CA_INIT_COMMAND] and [CA_INIT_PASSWORD] have been placed in /opt/stepcainstall/ as initstepca.sh and password.txt. You can run the script to initialize your CA and configure the step-ca daemon.
 
