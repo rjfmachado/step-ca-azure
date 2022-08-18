@@ -16,6 +16,7 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
 - [ ] Add High Availability to MySQL  
 - [ ] Add High Availability to step-ca  
 - [ ] Add VMSS base image
+- [ ] Azure Monitor support
 - [ ] Add deploy to azure experience <https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173>
 - [ ] SSH and Azure AD SSO <https://smallstep.com/blog/diy-single-sign-on-for-ssh/>
 
