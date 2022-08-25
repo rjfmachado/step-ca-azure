@@ -7,6 +7,7 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
 ## Backlog
 
 - [ ] Automate the configuration of the service [Support root/intermediate key URNs to be passed as parameters when using --kms=azurekms](https://github.com/smallstep/cli/issues/721)
+- [ ] Configure ACME provisioner <https://smallstep.com/docs/tutorials/acme-protocol-acme-clients>
 - [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
 - [ ] Review public access/firewall for services behind Private Endpoint 
 - [ ] Review Key Vault RBAC for minimum rights required
@@ -60,14 +61,18 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
 
 ## Initializing your CA
 
-Connect to your CA via Azure Bastion from a Virtual Machine with the matching private key. Replace the appropriate parameters.
+Connect to your CA via Azure Bastion from a Virtual Machine with the matching private key. Replace the appropriate parameters. The provided script depends on the last deployment to the resource group.
 
 ```bash
 az extension add --name ssh
-[[ -z "${AZURE_RG_NAME}" ]] && export AZURE_RG_NAME="pki"
-az network bastion ssh -n caBastion -g $AZURE_RG_NAME \
-  --auth-type ssh-key --username stepcaadmin --ssh-key ~/.ssh/id_rsa \
-  --target-resource-id $(az vm show -g $AZURE_RG_NAME --name stepcadev1 -o tsv --query id)
+export AZURE_RG_NAME="pki"
+export AZURE_BASTION=$(az deployment group list -g pki -o tsv --query [0].properties.parameters.bastionName.value)
+export CA_ADMIN_NAME=$(az deployment group list -g pki -o tsv --query [0].properties.parameters.caVMAdminUsername.value)
+export CA_VM_NAME=$(az deployment group list -g pki -o tsv --query [0].properties.parameters.caVMName.value)
+
+az network bastion ssh -n $AZURE_BASTION -g $AZURE_RG_NAME \
+  --auth-type ssh-key --username $CA_ADMIN_NAME --ssh-key ~/.ssh/id_rsa \
+  --target-resource-id $(az vm show -g $AZURE_RG_NAME --name $CA_VM_NAME -o tsv --query id)
 ```
 
 Consider this guidance the minimum set of steps required to stand up standalone step-ca in a VM in Azure, using Key Vault and MySQL Backend (soon).
