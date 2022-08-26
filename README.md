@@ -1,25 +1,39 @@
 # step CA on Azure
 
-A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure MySQL (soon) and Managed Identities.
+A sample implementation of a PKI with a standalone Certificate Authority with [step-ca](https://github.com/smallstep/certificates) on Azure, leveraging Azure Key Vault, Azure MySQL (soon) and Managed Identities. Please refer to smallstep documentation for any step-ca or step cli details. For convenience, I'm adding here the documentation referenced by me while building this sample.  
 
-> The below guidance has been designed and tested on the included GitHub codespaces environment.
+* [The Design & Architecture of Smallstep](https://smallstep.com/docs/design-document)
+* [Installation](https://smallstep.com/docs/step-ca/installation)  
+* [Configuration](https://smallstep.com/docs/step-ca/configuration)  
+* [Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)  
+* [step cli init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)  
+* [Production considerations](https://smallstep.com/docs/step-ca/certificate-authority-server-production)
+* [Integrations](https://smallstep.com/docs/step-ca/integrations)
+* [Provisioners](https://smallstep.com/docs/step-ca/provisioners)
+
 
 ## Backlog
 
-- [ ] Automate the configuration of the service [Support root/intermediate key URNs to be passed as parameters when using --kms=azurekms](https://github.com/smallstep/cli/issues/721)
+- [ ] Move the backlog to GitHub
+- [ ] Configure Azure Provisioner
 - [ ] Configure ACME provisioner <https://smallstep.com/docs/tutorials/acme-protocol-acme-clients>
+- [ ] Add detailed deployment guidance, automation details and architecture diagram
 - [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
+  - [ ] [autocert](https://github.com/smallstep/autocert)
+  - [ ] [Virtual Machines](https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/)
 - [ ] Review public access/firewall for services behind Private Endpoint 
 - [ ] Review Key Vault RBAC for minimum rights required
 - [ ] Review Step provisioners and Provisioner management <https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management>
 - [ ] Add MySQL as Database
 - [ ] Test Azure Managed HSM and Azure Dedicated HSM
 - [ ] Add High Availability to MySQL  
+- [ ] Store password, ca.json and defaults.json
 - [ ] Add High Availability to step-ca  
 - [ ] Add VMSS base image
-- [ ] Azure Monitor support
+- [ ] Azure Monitor support, metrics and logs
 - [ ] Add deploy to azure experience <https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173>
 - [ ] SSH and Azure AD SSO <https://smallstep.com/blog/diy-single-sign-on-for-ssh/>
+- [ ] AKS version [smallstep/step-ca](https://hub.docker.com/r/smallstep/step-ca) and [Helm Chart](https://artifacthub.io/packages/helm/smallstep/step-certificates)
 
 ## Deploying the solution
 
@@ -30,38 +44,39 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
     az account show -o tsv --query name
     ```
 
-1. This guidance and provided github workflows (soon) expect the following environment variables to be present:
+1. The following environment variables can be used by the deployment script to set the required parameter values. Please review the template for the full list of parameters that can be configured.
 
     | Variable   |      Default value    |  Notes |
     |-|-:|-:|
     | AZURE_RG_NAME | | Target Resource Group |
     | AZURE_LOCATION | westeurope | Target region for the deployment |
     | CA_CAVMNAME | | Virtual Machine name |
-    | CA_KEYVAULTNAME | | Key Vault name - Must be unique |
+    | CA_KEYVAULTNAME | | Key Vault name |
     | CA_SSH_PUBLIC_KEY | | SSH Public Key |
     | DB_ADMIN_PASSWORD | | Database admin user password | 
     | CA_INIT_PASSWORD | | Parameter for step ca init --password-file contents |
-    | CA_INIT_COMMAND | | CA Initialization instructions |
+    | CA_INIT_NAME | | CA Name |
+    | CA_INIT_DNS | | The DNS fully qualified name of the CA |
+    | CA_INIT_PROVISIONER_JWK | | The name of the default JWK provisioner|
 
-    The repo provides a sample standalone CA init for Azure Key Vault, please refer to [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init) for more information.
-    Variables can be exposed to the deployment script in the shell, via codespaces secrets if you use the provided codespaces container or via repository secrets if you use the provided deployment workflows (soon). For example:
+    *For more information about the CA_INIT_ parameters, please refer to the [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init).*  
+
+    Variables can be exposed to the deployment script in the shell or via codespaces secrets if you use the provided codespaces container. For example:
 
     ```bash
-    #Example variables, replace values in []
-    export CA_INIT_COMMAND="step ca init --deployment-type=standalone --name=[CA_INIT_NAME] --dns=[CA_INIT_DNS] --address=[CA_INIT_PORT]--provisioner=[CA_INIT_PROVISIONER] --kms=azurekms --no-db --password-file=/opt/stepcainstall/password.txt"
     export CA_CAVMNAME="myca"
-    export AZURE_LOCATION="westeurope"
+    export AZURE_LOCATION="uksouth"
     ```
 
-    Run the deployment script after setting all the required variables.
+1. Run the deployment script.
 
     ```bash
     ./deploy/deploy.sh
     ```
 
-## Initializing your CA
+## Connecting to your CA
 
-Connect to your CA via Azure Bastion from a Virtual Machine with the matching private key. Replace the appropriate parameters. The provided script depends on the last deployment to the resource group.
+Connect to your CA via Azure Bastion from a Virtual Machine with the matching private key. The provided script depends on the last deployment to the resource group to discover the necessary parameters.
 
 ```bash
 az extension add --name ssh
@@ -75,46 +90,9 @@ az network bastion ssh -n $AZURE_BASTION -g $AZURE_RG_NAME \
   --target-resource-id $(az vm show -g $AZURE_RG_NAME --name $CA_VM_NAME -o tsv --query id)
 ```
 
-Consider this guidance the minimum set of steps required to stand up standalone step-ca in a VM in Azure, using Key Vault and MySQL Backend (soon).
-Please refer to smallstep documentation and guidance for any configuration changes or guidance. For convenience, I'm adding here the documentation referenced by me while building this sample.
-
-1. Bootstrap with DB and Key Vault
-
-[Installation](https://smallstep.com/docs/step-ca/installation)  
-[Configuration](https://smallstep.com/docs/step-ca/configuration)  
-[Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)  
-[step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)  
-
-Your [CA_INIT_COMMAND] and [CA_INIT_PASSWORD] have been placed in /opt/stepcainstall/ as initstepca.sh and password.txt. You can run the script to initialize your CA and configure the step-ca daemon.
-
-```bash
-/opt/stepcainstall/initstepca.sh
-```
-
->the schema for the keys is the following:  
->azurekms:name=rootkey;vault=[CA_KEYVAULTNAME]  
->azurekms:name=intermediatekey;vault=[CA_KEYVAULTNAME]
-
 ## Requirements
 
 Note: these are included in the provide dev container/codespaces.
 
 - [GitHub CLI](https://cli.github.com/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-
-## Documentation
-
-<https://github.com/wasabii/step-ca-azure>  
-<https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/>  
-<https://github.com/smallstep/certificates>  
-<https://smallstep.com/docs/step-ca/provisioners>  
-<https://artifacthub.io/packages/helm/smallstep/step-certificates>  
-<https://hub.docker.com/r/smallstep/step-ca>  
-<https://github.com/smallstep/autocert>  
-
-<https://smallstep.com/docs/design-document>  
-<https://smallstep.com/docs/step-ca/certificate-authority-server-production/#load-balancing-or-proxying-step-ca-traffic>  
-<https://smallstep.com/docs/step-ca/integrations>  
-<https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics#3-confirm-that-the-key-vault-firewall-is-properly-configured>  
-<https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-troubleshoot>  
-
