@@ -2,11 +2,14 @@
 
 A sample implementation of a PKI with a standalone Certificate Authority with [step-ca](https://github.com/smallstep/certificates) on Azure, leveraging Azure Key Vault, Azure MySQL (soon) and Managed Identities. Please refer to smallstep documentation for any step-ca or step cli details. For convenience, I'm adding here the documentation referenced by me while building this sample.  
 
+* [The Design & Architecture of Smallstep](https://smallstep.com/docs/design-document)
 * [Installation](https://smallstep.com/docs/step-ca/installation)  
 * [Configuration](https://smallstep.com/docs/step-ca/configuration)  
 * [Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)  
 * [step cli init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)  
 * [Production considerations](https://smallstep.com/docs/step-ca/certificate-authority-server-production)
+* [Integrations](https://smallstep.com/docs/step-ca/integrations)
+* [Provisioners](https://smallstep.com/docs/step-ca/provisioners)
 
 
 ## Backlog
@@ -16,6 +19,8 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
 - [ ] Configure ACME provisioner <https://smallstep.com/docs/tutorials/acme-protocol-acme-clients>
 - [ ] Add detailed deployment guidance, automation details and architecture diagram
 - [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
+  - [ ] [autocert](https://github.com/smallstep/autocert)
+  - [ ] [Virtual Machines](https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/)
 - [ ] Review public access/firewall for services behind Private Endpoint 
 - [ ] Review Key Vault RBAC for minimum rights required
 - [ ] Review Step provisioners and Provisioner management <https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management>
@@ -28,6 +33,7 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
 - [ ] Azure Monitor support, metrics and logs
 - [ ] Add deploy to azure experience <https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173>
 - [ ] SSH and Azure AD SSO <https://smallstep.com/blog/diy-single-sign-on-for-ssh/>
+- [ ] AKS version [smallstep/step-ca](https://hub.docker.com/r/smallstep/step-ca) and [Helm Chart](https://artifacthub.io/packages/helm/smallstep/step-certificates)
 
 ## Deploying the solution
 
@@ -90,20 +96,3 @@ Note: these are included in the provide dev container/codespaces.
 
 - [GitHub CLI](https://cli.github.com/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-
-## Documentation
-
-<https://github.com/wasabii/step-ca-azure>  
-<https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/>  
-<https://github.com/smallstep/certificates>  
-<https://smallstep.com/docs/step-ca/provisioners>  
-<https://artifacthub.io/packages/helm/smallstep/step-certificates>  
-<https://hub.docker.com/r/smallstep/step-ca>  
-<https://github.com/smallstep/autocert>  
-
-<https://smallstep.com/docs/design-document>  
-<https://smallstep.com/docs/step-ca/certificate-authority-server-production/#load-balancing-or-proxying-step-ca-traffic>  
-<https://smallstep.com/docs/step-ca/integrations>  
-<https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics#3-confirm-that-the-key-vault-firewall-is-properly-configured>  
-<https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-troubleshoot>  
-
