@@ -1,11 +1,13 @@
 # step CA on Azure
 
-A sample implementation of a PKI with a standalone Certificate Authority with [step-ca](https://github.com/smallstep/certificates) on Azure leveraging Azure Key Vault, Azure MySQL (soon) and Managed Identities. Please refer to smallstep documentation and guidance for any configuration changes or guidance. For convenience, I'm adding here the documentation referenced by me while building this sample.  
+A sample implementation of a PKI with a standalone Certificate Authority with [step-ca](https://github.com/smallstep/certificates) on Azure, leveraging Azure Key Vault, Azure MySQL (soon) and Managed Identities. Please refer to smallstep documentation for any step-ca or step cli details. For convenience, I'm adding here the documentation referenced by me while building this sample.  
 
-[Installation](https://smallstep.com/docs/step-ca/installation)  
-[Configuration](https://smallstep.com/docs/step-ca/configuration)  
-[Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)  
-[step init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)  
+* [Installation](https://smallstep.com/docs/step-ca/installation)  
+* [Configuration](https://smallstep.com/docs/step-ca/configuration)  
+* [Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)  
+* [step cli init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)  
+* [Production considerations](https://smallstep.com/docs/step-ca/certificate-authority-server-production)
+
 
 ## Backlog
 
