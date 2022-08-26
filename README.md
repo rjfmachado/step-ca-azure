@@ -6,6 +6,7 @@ A sample implementation of a PKI with a standalone Certificate Authority with st
 
 ## Backlog
 
+- [ ] Configure Azure Provisioner
 - [ ] Configure ACME provisioner <https://smallstep.com/docs/tutorials/acme-protocol-acme-clients>
 - [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
 - [ ] Review public access/firewall for services behind Private Endpoint 
