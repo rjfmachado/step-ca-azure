@@ -6,8 +6,10 @@ A sample implementation of a PKI with a standalone Certificate Authority with st
 
 ## Backlog
 
+- [ ] Move the backlog to GitHub
 - [ ] Configure Azure Provisioner
 - [ ] Configure ACME provisioner <https://smallstep.com/docs/tutorials/acme-protocol-acme-clients>
+- [ ] Add detailed deployment guidance, automation details and architecture diagram
 - [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
 - [ ] Review public access/firewall for services behind Private Endpoint 
 - [ ] Review Key Vault RBAC for minimum rights required
@@ -18,7 +20,7 @@ A sample implementation of a PKI with a standalone Certificate Authority with st
 - [ ] Store password, ca.json and defaults.json
 - [ ] Add High Availability to step-ca  
 - [ ] Add VMSS base image
-- [ ] Azure Monitor support
+- [ ] Azure Monitor support, metrics and logs
 - [ ] Add deploy to azure experience <https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173>
 - [ ] SSH and Azure AD SSO <https://smallstep.com/blog/diy-single-sign-on-for-ssh/>
 
