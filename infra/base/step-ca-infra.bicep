@@ -96,7 +96,7 @@ var caVMlinuxConfiguration = {
     publicKeys: [
       {
         path: '/home/${caVMAdminUsername}/.ssh/authorized_keys'
-        keyData: caPulicSshKey.properties.publicKey
+        keyData: caPublicSshKey.properties.publicKey
       }
     ]
   }
@@ -425,7 +425,7 @@ resource stepcaImageDefinition 'Microsoft.Compute/galleries/images@2022-01-03' =
   }
 }
 
-resource caPulicSshKey 'Microsoft.Compute/sshPublicKeys@2022-03-01' = {
+resource caPublicSshKey 'Microsoft.Compute/sshPublicKeys@2022-03-01' = {
   name: 'caVMSSHKey'
   location: location
   tags: tags
@@ -501,6 +501,10 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
   name: caVMName
   location: location
   tags: tags
+  dependsOn: [
+    caKeyvault
+    cavmkeyvaultadmin
+  ]
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
