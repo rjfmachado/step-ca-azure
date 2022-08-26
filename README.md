@@ -1,8 +1,11 @@
 # step CA on Azure
 
-A sample implementation of a PKI with a standalone Certificate Authority with step-ca on Azure leveraging Azure Key Vault, Azure MySQL (soon) and Managed Identities.
+A sample implementation of a PKI with a standalone Certificate Authority with [step-ca](https://github.com/smallstep/certificates) on Azure leveraging Azure Key Vault, Azure MySQL (soon) and Managed Identities. Please refer to smallstep documentation and guidance for any configuration changes or guidance. For convenience, I'm adding here the documentation referenced by me while building this sample.  
 
-> The below guidance has been designed and tested on the included GitHub codespaces environment.
+[Installation](https://smallstep.com/docs/step-ca/installation)  
+[Configuration](https://smallstep.com/docs/step-ca/configuration)  
+[Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)  
+[step init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)  
 
 ## Backlog
 
@@ -33,34 +36,31 @@ A sample implementation of a PKI with a standalone Certificate Authority with st
     az account show -o tsv --query name
     ```
 
-1. This guidance and provided github workflows (soon) expect the following environment variables to be present:
+1. The following environment variables can be used by the deployment script to set the required parameter values. Please review the template for the full list of parameters that can be configured.
 
     | Variable   |      Default value    |  Notes |
     |-|-:|-:|
     | AZURE_RG_NAME | | Target Resource Group |
     | AZURE_LOCATION | westeurope | Target region for the deployment |
     | CA_CAVMNAME | | Virtual Machine name |
-    | CA_KEYVAULTNAME | | Key Vault name - Must be unique |
+    | CA_KEYVAULTNAME | | Key Vault name |
     | CA_SSH_PUBLIC_KEY | | SSH Public Key |
     | DB_ADMIN_PASSWORD | | Database admin user password | 
     | CA_INIT_PASSWORD | | Parameter for step ca init --password-file contents |
     | CA_INIT_NAME | | CA Name |
     | CA_INIT_DNS | | The DNS fully qualified name of the CA |
-    | CA_INIT_PROVISIONER_JWK | | The name of the default JWK provisioner.|
+    | CA_INIT_PROVISIONER_JWK | | The name of the default JWK provisioner|
 
+    *For more information about the CA_INIT_ parameters, please refer to the [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init).*  
 
-    > The repo configures sample standalone CA, please refer to [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init) for more information to the CA_INIT_* parameters.
-
-    Variables can be exposed to the deployment script in the shell, via codespaces secrets if you use the provided codespaces container or via repository secrets if you use the provided deployment workflows (soon). For example:
+    Variables can be exposed to the deployment script in the shell or via codespaces secrets if you use the provided codespaces container. For example:
 
     ```bash
-    #Example variables, replace values in []
     export CA_CAVMNAME="myca"
-    export AZURE_LOCATION="westeurope"
-    export CA_INIT_PROVISIONER_JWK="$(az account show -o tsv --query user.name)"
+    export AZURE_LOCATION="uksouth"
     ```
 
-    Run the deployment script after setting all the required variables.
+1. Run the deployment script.
 
     ```bash
     ./deploy/deploy.sh
@@ -68,7 +68,7 @@ A sample implementation of a PKI with a standalone Certificate Authority with st
 
 ## Connecting to your CA
 
-Connect to your CA via Azure Bastion from a Virtual Machine with the matching private key. Replace the appropriate parameters. The provided script depends on the last deployment to the resource group.
+Connect to your CA via Azure Bastion from a Virtual Machine with the matching private key. The provided script depends on the last deployment to the resource group to discover the necessary parameters.
 
 ```bash
 az extension add --name ssh
@@ -81,26 +81,6 @@ az network bastion ssh -n $AZURE_BASTION -g $AZURE_RG_NAME \
   --auth-type ssh-key --username $CA_ADMIN_NAME --ssh-key ~/.ssh/id_rsa \
   --target-resource-id $(az vm show -g $AZURE_RG_NAME --name $CA_VM_NAME -o tsv --query id)
 ```
-
-Consider this guidance the minimum set of steps required to stand up standalone step-ca in a VM in Azure, using Key Vault and MySQL Backend (soon).
-Please refer to smallstep documentation and guidance for any configuration changes or guidance. For convenience, I'm adding here the documentation referenced by me while building this sample.
-
-1. Bootstrap with DB and Key Vault
-
-[Installation](https://smallstep.com/docs/step-ca/installation)  
-[Configuration](https://smallstep.com/docs/step-ca/configuration)  
-[Azure Key Vault](https://smallstep.com/docs/step-ca/configuration/#azure-key-vault)  
-[step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init)  
-
-Your [CA_INIT_COMMAND] and [CA_INIT_PASSWORD] have been placed in /opt/stepcainstall/ as initstepca.sh and password.txt. You can run the script to initialize your CA and configure the step-ca daemon.
-
-```bash
-/opt/stepcainstall/initstepca.sh
-```
-
->the schema for the keys is the following:  
->azurekms:name=rootkey;vault=[CA_KEYVAULTNAME]  
->azurekms:name=intermediatekey;vault=[CA_KEYVAULTNAME]
 
 ## Requirements
 
