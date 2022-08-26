@@ -9,8 +9,7 @@ az deployment group create -g $AZURE_RG_NAME -o none \
   --parameters caVMName="$CA_CAVMNAME" \
   --parameters keyvaultName="$CA_KEYVAULTNAME" \
   --parameters caVMPublicSshKey="$CA_SSH_PUBLIC_KEY" \
-  --parameters caINIT_COMMAND="$CA_INIT_COMMAND" \
-  --parameters caINIT_PASSWORD="$CA_INIT_PASSWORD" \
+  --parameters ca_INIT_PASSWORD="$CA_INIT_PASSWORD" \
   --parameters dbLoginPassword="$DB_ADMIN_PASSWORD"
 
 # # Get the current subscription id, tenant id, and Github organization and repository

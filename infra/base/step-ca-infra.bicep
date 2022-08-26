@@ -66,13 +66,18 @@ param caVMAdminUsername string = 'stepcaadmin'
 param caVMPublicSshKey string
 param caPort int = 443
 param caVMCustomData string = loadTextContent('cloudinit.yaml')
-param caRootKeyName string = 'caRootKey'
-param caIntermediateKeyName string = 'caIntermediateKey'
-param caSTEP_CA_VERSION string = '0.21.0'
-param caSTEP_CLI_VERSION string = '0.21.0'
-param caINIT_COMMAND string
+param caSTEP_CA_VERSION string = '0.22.0'
+param caSTEP_CLI_VERSION string = '0.22.0'
+param ca_INIT_NAME string
+param ca_INIT_DNS string
+param ca_INIT_PORT string = ':443'
+param ca_INIT_ROOT_KEY_NAME string = 'root'
+param ca_INIT_INTERMEDIATE_KEY_NAME string = 'intermediate'
+
+param ca_INIT_PROVISIONER_JWT string
+
 @secure()
-param caINIT_PASSWORD string
+param ca_INIT_PASSWORD string
 
 @description('The image reference. please select a step-ca supported OS with systemd version 245 or greater.')
 param caVMImageReference object = {
@@ -97,15 +102,22 @@ var caVMlinuxConfiguration = {
   }
 }
 
-var cloudinit1 = replace(caVMCustomData, '[STEP_CA_VERSION]', caSTEP_CA_VERSION)
+//var cloudinit5 = replace(cloudinit4, '[STEP_CA_INIT_COMMAND]', caINIT_COMMAND)
+
+//load the cloudinit template and perform template replacements
+var cloudinit0 = caVMCustomData
+var cloudinit1 = replace(cloudinit0, '[STEP_CA_VERSION]', caSTEP_CA_VERSION)
 var cloudinit2 = replace(cloudinit1, '[STEP_CLI_VERSION]', caSTEP_CLI_VERSION)
 var cloudinit3 = replace(cloudinit2, '[caVMAdminUsername]', caVMAdminUsername)
 var cloudinit4 = replace(cloudinit3, '[AZURE_CLIENT_ID]', caManagedIdentity.properties.clientId)
-var cloudinit5 = replace(cloudinit4, '[STEP_CA_INIT_COMMAND]', caINIT_COMMAND)
-var cloudinit6 = replace(cloudinit5, '[CA_ROOT_KEY_NAME]', caRootKeyName)
-var cloudinit7 = replace(cloudinit6, '[CA_INT_KEY_NAME]', caIntermediateKeyName)
-var cloudinit8 = replace(cloudinit7, '[CA_KEYVAULTNAME]', keyvaultName)
-var cloudinit = cloudinit8
+var cloudinit5 = replace(cloudinit4, '[CA_KEYVAULTNAME]', keyvaultName)
+var cloudinit6 = replace(cloudinit5, '[CA_ROOT_KEY_NAME]', ca_INIT_ROOT_KEY_NAME)
+var cloudinit7 = replace(cloudinit6, '[CA_INT_KEY_NAME]', ca_INIT_INTERMEDIATE_KEY_NAME)
+var cloudinit8 = replace(cloudinit7, '[CA_INIT_NAME]', ca_INIT_NAME)
+var cloudinit9 = replace(cloudinit8, '[CA_INIT_DNS]', ca_INIT_DNS)
+var cloudinit10 = replace(cloudinit9, '[CA_INIT_PORT]', ca_INIT_PORT)
+var cloudinit11 = replace(cloudinit10, '[CA_INIT_PROVISIONER_JWT]', ca_INIT_PROVISIONER_JWT)
+var cloudinit = cloudinit11
 
 resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (virtualNetworkDeploy) {
   name: virtualNetworkName
@@ -530,7 +542,7 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
       typeHandlerVersion: '2.1'
       autoUpgradeMinorVersion: true
       protectedSettings: {
-        commandToExecute: 'echo "${caINIT_PASSWORD}" > /opt/stepcainstall/password.txt'
+        commandToExecute: 'echo "${ca_INIT_PASSWORD}" > /opt/stepcainstall/password.txt'
       }
       // protectedSettingsFromKeyVault: {
       //   keyVault: {
