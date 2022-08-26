@@ -1,12 +1,11 @@
 # step CA on Azure
 
-A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure MySQL (soon) and Managed Identities.
+A sample implementation of a PKI with a standalone Certificate Authority with step-ca on Azure leveraging Azure Key Vault, Azure MySQL (soon) and Managed Identities.
 
 > The below guidance has been designed and tested on the included GitHub codespaces environment.
 
 ## Backlog
 
-- [ ] Automate the configuration of the service [Support root/intermediate key URNs to be passed as parameters when using --kms=azurekms](https://github.com/smallstep/cli/issues/721)
 - [ ] Configure ACME provisioner <https://smallstep.com/docs/tutorials/acme-protocol-acme-clients>
 - [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
 - [ ] Review public access/firewall for services behind Private Endpoint 
@@ -41,16 +40,20 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
     | CA_SSH_PUBLIC_KEY | | SSH Public Key |
     | DB_ADMIN_PASSWORD | | Database admin user password | 
     | CA_INIT_PASSWORD | | Parameter for step ca init --password-file contents |
-    | CA_INIT_COMMAND | | CA Initialization instructions |
+    | CA_INIT_NAME | | CA Name |
+    | CA_INIT_DNS | | The DNS fully qualified name of the CA |
+    | CA_INIT_PROVISIONER_JWK | | The name of the default JWK provisioner.|
 
-    The repo provides a sample standalone CA init for Azure Key Vault, please refer to [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init) for more information.
+
+    > The repo configures sample standalone CA, please refer to [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init) for more information to the CA_INIT_* parameters.
+
     Variables can be exposed to the deployment script in the shell, via codespaces secrets if you use the provided codespaces container or via repository secrets if you use the provided deployment workflows (soon). For example:
 
     ```bash
     #Example variables, replace values in []
-    export CA_INIT_COMMAND="step ca init --deployment-type=standalone --name=[CA_INIT_NAME] --dns=[CA_INIT_DNS] --address=[CA_INIT_PORT]--provisioner=[CA_INIT_PROVISIONER] --kms=azurekms --no-db --password-file=/opt/stepcainstall/password.txt"
     export CA_CAVMNAME="myca"
     export AZURE_LOCATION="westeurope"
+    export CA_INIT_PROVISIONER_JWK="$(az account show -o tsv --query user.name)"
     ```
 
     Run the deployment script after setting all the required variables.
@@ -59,7 +62,7 @@ A sample implementation of step-ca on Azure leveraging Azure Key Vault, Azure My
     ./deploy/deploy.sh
     ```
 
-## Initializing your CA
+## Connecting to your CA
 
 Connect to your CA via Azure Bastion from a Virtual Machine with the matching private key. Replace the appropriate parameters. The provided script depends on the last deployment to the resource group.
 

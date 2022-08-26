@@ -9,6 +9,7 @@ az deployment group create -g $AZURE_RG_NAME -o none \
   --parameters caVMName="$CA_CAVMNAME" \
   --parameters keyvaultName="$CA_KEYVAULTNAME" \
   --parameters caVMPublicSshKey="$CA_SSH_PUBLIC_KEY" \
+  --parameters ca_INIT_PROVISIONER_JWT="$(az account show -o tsv --query user.name)" \
   --parameters ca_INIT_PASSWORD="$CA_INIT_PASSWORD" \
   --parameters dbLoginPassword="$DB_ADMIN_PASSWORD"
 
