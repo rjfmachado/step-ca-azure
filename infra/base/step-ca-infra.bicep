@@ -66,7 +66,7 @@ param caVMAdminUsername string = 'stepcaadmin'
 param caVMPublicSshKey string
 param caPort int = 443
 param caVMCustomData string = loadTextContent('cloudinit.yaml')
-param caSTEP_CA_VERSION string = '0.22.0'
+param caSTEP_CA_VERSION string = '0.22.1'
 param caSTEP_CLI_VERSION string = '0.22.0'
 param ca_INIT_NAME string
 param ca_INIT_DNS string

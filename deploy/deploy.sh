@@ -4,7 +4,7 @@
 [[ -z "${DB_ADMIN_PASSWORD}" ]] && export DB_ADMIN_PASSWORD='your Database admin password'
 [[ -z "${CA_INIT_NAME}" ]] && export CA_INIT_NAME='your CA Name'
 [[ -z "${CA_INIT_DNS}" ]] && export CA_INIT_DNS='your DNS fqdn'
-[[ -a "${CA_INIT_PROVISIONER_JWT}" ]] && export CA_INIT_PROVISIONER_JWT="$(az account show -o tsv --query user.name)"
+[[ -z "${CA_INIT_PROVISIONER_JWT}" ]] && export CA_INIT_PROVISIONER_JWT="$(az account show -o tsv --query user.name)"
 
 az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION -o none
 az deployment group create -g $AZURE_RG_NAME -o none \
