@@ -44,9 +44,6 @@ param dnsResolverOutboundDNSDomainName string
 
 param keyvaultName string
 //@secure()
-//param caSecret string
-
-// Bastion host name
 
 param bastionName string = 'caBastion'
 param bastionSku string = 'Standard'
