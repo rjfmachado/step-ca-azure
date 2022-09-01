@@ -8,7 +8,7 @@ param tags object = {
 
 param galleryDeploy bool = false
 param virtualNetworkDeploy bool = true
-param dnsResolverDeploy bool = true
+param dnsResolverDeploy bool = false
 param keyvaultDeploy bool = true
 param bastionDeploy bool = true
 param databaseDeploy bool = false
@@ -37,6 +37,7 @@ param imageRecommended object = {
 }
 
 param virtualNetworkName string = 'stepca'
+param virtualNetworkDNSServers array = []
 
 param dnsResolverName string = 'dnsresolver'
 param dnsResolverOutboundDNS array
@@ -127,7 +128,7 @@ resource virtualnetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (vir
   location: location
   properties: {
     dhcpOptions: {
-      dnsServers: []
+      dnsServers: virtualNetworkDNSServers
     }
     addressSpace: {
       addressPrefixes: [
