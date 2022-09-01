@@ -24,6 +24,7 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
   - [ ] [autocert](https://github.com/smallstep/autocert)
   - [ ] [Virtual Machines](https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/)
   - [ ] [ACME clients](https://smallstep.com/docs/tutorials/acme-protocol-acme-clients)
+  - [ ] [cert-manager](https://cert-manager.io/)
 - [ ] Review public access/firewall for services behind Private Endpoint 
 - [ ] Review Key Vault RBAC for minimum rights required
 - [ ] Review Step provisioners and Provisioner management <https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management>
