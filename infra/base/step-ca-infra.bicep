@@ -7,6 +7,13 @@ param tags object = {
 }
 
 param galleryDeploy bool = false
+param virtualNetworkDeploy bool = true
+param dnsResolverDeploy bool = true
+param keyvaultDeploy bool = true
+param bastionDeploy bool = true
+param databaseDeploy bool = false
+param caDeploy bool = true
+
 param galleryName string = 'stepca'
 param galleryManagedIdentityName string = 'galleryManagedIdentity'
 
@@ -29,24 +36,26 @@ param imageRecommended object = {
   }
 }
 
-param virtualNetworkDeploy bool = true
 param virtualNetworkName string = 'stepca'
 
 param dnsResolverName string = 'dnsresolver'
-param dnsResolverOutboundDNS array = []
-param dnsResolverOutboundDNSDomainName string
+param dnsResolverOutboundDNS array = [
+  {
+    ipAddress: '192.168.0.1'
+    port: 53
+  }
+]
+param dnsResolverOutboundDNSDomainName string = 'test.com.'
 
-param keyvaultDeploy bool = true
 param keyvaultName string
 //@secure()
 //param caSecret string
 
 // Bastion host name
-param bastionDeploy bool = false
+
 param bastionName string = 'caBastion'
 param bastionSku string = 'Standard'
 
-param dbDeploy bool = false
 param dbName string = 'stepca'
 param dbLogin string = 'cadbadmin'
 @secure()
@@ -62,7 +71,7 @@ param dbHighAvailability object = {
 param dbVersion string = '5.7'
 
 // CA Virtual Machine Parameters
-param caDeploy bool = false
+
 param caVMName string
 param caVMAdminUsername string = 'stepcaadmin'
 @description('SSH Key')
@@ -83,7 +92,7 @@ param ca_INIT_PROVISIONER_JWT string
 @secure()
 param ca_INIT_PASSWORD string
 
-@description('The image reference. please select a step-ca supported OS with systemd version 245 or greater.')
+@description('The image reference. please select a debian/ubuntu based step-ca supported OS with systemd version 245 or greater.')
 param caVMImageReference object = {
   publisher: 'Debian'
   offer: 'debian-11'
@@ -333,7 +342,7 @@ resource keyvaultAdminrole 'Microsoft.Authorization/roleDefinitions@2018-01-01-p
   name: '00482a5a-887f-4fb3-b363-3b7fe8e74483'
 }
 
-resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = if (dbDeploy) {
+resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = if (databaseDeploy) {
   name: dbName
   location: location
   tags: tags
@@ -353,7 +362,7 @@ resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = if (dbDeploy)
   }
 }
 
-resource mysqlPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (dbDeploy) {
+resource mysqlPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (databaseDeploy) {
   name: 'privatelink.mysql.database.azure.com'
   location: 'global'
   tags: tags
@@ -371,7 +380,7 @@ resource mysqlPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if
   }
 }
 
-resource mysqlManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = if (dbDeploy) {
+resource mysqlManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = if (databaseDeploy) {
   name: dbManagedIdentityName
   location: location
   tags: tags
@@ -581,7 +590,7 @@ resource cavmkeyvaultadmin 'Microsoft.Authorization/roleAssignments@2020-10-01-p
   }
 }
 
-resource privateresolver 'Microsoft.Network/dnsResolvers@2020-04-01-preview' = if (virtualNetworkDeploy) {
+resource privateresolver 'Microsoft.Network/dnsResolvers@2020-04-01-preview' = if (virtualNetworkDeploy && dnsResolverDeploy) {
   name: dnsResolverName
   location: location
   properties: {
@@ -601,11 +610,15 @@ resource privateresolver 'Microsoft.Network/dnsResolvers@2020-04-01-preview' = i
   }
 }
 
-resource dnsForwardRules 'Microsoft.Network/dnsForwardingRulesets@2020-04-01-preview' = {
+resource dnsForwardRules 'Microsoft.Network/dnsForwardingRulesets@2020-04-01-preview' = if (virtualNetworkDeploy && dnsResolverDeploy) {
   name: 'external'
   location: location
   properties: {
-    dnsResolverOutboundEndpoints: [ any(privateresolver::outboundEndpoints.id) ]
+    dnsResolverOutboundEndpoints: [
+      {
+        id: privateresolver::outboundEndpoints.id
+      }
+    ]
   }
 
   resource outbound 'forwardingRules@2020-04-01-preview' = {
@@ -613,6 +626,15 @@ resource dnsForwardRules 'Microsoft.Network/dnsForwardingRulesets@2020-04-01-pre
     properties: {
       targetDnsServers: dnsResolverOutboundDNS
       domainName: dnsResolverOutboundDNSDomainName
+    }
+  }
+
+  resource networkLink 'virtualNetworkLinks@2020-04-01-preview' = {
+    name: 'outbound'
+    properties: {
+      virtualNetwork: {
+        id: virtualnetwork.id
+      }
     }
   }
 }
