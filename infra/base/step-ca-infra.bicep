@@ -39,13 +39,8 @@ param imageRecommended object = {
 param virtualNetworkName string = 'stepca'
 
 param dnsResolverName string = 'dnsresolver'
-param dnsResolverOutboundDNS array = [
-  {
-    ipAddress: '192.168.0.1'
-    port: 53
-  }
-]
-param dnsResolverOutboundDNSDomainName string = 'test.com.'
+param dnsResolverOutboundDNS array
+param dnsResolverOutboundDNSDomainName string
 
 param keyvaultName string
 //@secure()
