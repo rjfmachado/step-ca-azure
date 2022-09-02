@@ -30,7 +30,8 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
 * [ ] Add MySQL as Database
 * [ ] Test Azure Managed HSM and Azure Dedicated HSM
 * [ ] Add High Availability to MySQL  
-* [ ] Store password, ca.json and defaults.json
+* [ ] Improve CA initialization during deployment via script or ACI.
+  * [ ] Store password, ca.json and defaults.json in Key Vault.
 * [ ] Add High Availability to step-ca  
 * [ ] Add VMSS base image
 * [ ] Azure Monitor support, metrics and logs
