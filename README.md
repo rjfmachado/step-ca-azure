@@ -27,7 +27,7 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
   - [ ] [cert-manager](https://cert-manager.io/)
 - [ ] Review public access/firewall for services behind Private Endpoint 
 - [ ] Review Key Vault RBAC for minimum rights required
-- [ ] Review Step provisioners and Provisioner management <https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management>
+- [ ] Review Step provisioners and [Remote Provisioner management](https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management)
 - [ ] Add MySQL as Database
 - [ ] Test Azure Managed HSM and Azure Dedicated HSM
 - [ ] Add High Availability to MySQL  
@@ -35,8 +35,8 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
 - [ ] Add High Availability to step-ca  
 - [ ] Add VMSS base image
 - [ ] Azure Monitor support, metrics and logs
-- [ ] Add deploy to azure experience <https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173>
-- [ ] SSH and Azure AD SSO <https://smallstep.com/blog/diy-single-sign-on-for-ssh/>
+- [ ] Add Deploy to Azure portal experience
+- [ ] [SSH and Azure AD SSO](https://smallstep.com/blog/diy-single-sign-on-for-ssh)
 - [ ] AKS version [smallstep/step-ca](https://hub.docker.com/r/smallstep/step-ca) and [Helm Chart](https://artifacthub.io/packages/helm/smallstep/step-certificates)
 
 ## Deploying the solution
