@@ -7,6 +7,13 @@ param tags object = {
 }
 
 param galleryDeploy bool = false
+param virtualNetworkDeploy bool = true
+param dnsResolverDeploy bool = true
+param keyvaultDeploy bool = true
+param bastionDeploy bool = true
+param databaseDeploy bool = false
+param caDeploy bool = true
+
 param galleryName string = 'stepca'
 param galleryManagedIdentityName string = 'galleryManagedIdentity'
 
@@ -29,21 +36,19 @@ param imageRecommended object = {
   }
 }
 
-param virtualNetworkDeploy bool = true
 param virtualNetworkName string = 'stepca'
 param virtualNetworkDNSServers array = []
 
-param keyvaultDeploy bool = true
+param dnsResolverName string = 'dnsresolver'
+param dnsResolverOutboundTargetDNS array
+param dnsResolverOutboundDNSDomainName string
+
 param keyvaultName string
 //@secure()
-//param caSecret string
 
-// Bastion host name
-param bastionDeploy bool = true
 param bastionName string = 'caBastion'
 param bastionSku string = 'Standard'
 
-param dbDeploy bool = false
 param dbName string = 'stepca'
 param dbLogin string = 'cadbadmin'
 @secure()
@@ -59,6 +64,7 @@ param dbHighAvailability object = {
 param dbVersion string = '5.7'
 
 // CA Virtual Machine Parameters
+
 param caVMName string
 param caVMAdminUsername string = 'stepcaadmin'
 @description('SSH Key')
@@ -79,7 +85,7 @@ param ca_INIT_PROVISIONER_JWT string
 @secure()
 param ca_INIT_PASSWORD string
 
-@description('The image reference. please select a step-ca supported OS with systemd version 245 or greater.')
+@description('The image reference. please select a debian/ubuntu based step-ca supported OS with systemd version 245 or greater.')
 param caVMImageReference object = {
   publisher: 'Debian'
   offer: 'debian-11'
@@ -96,20 +102,18 @@ var caVMlinuxConfiguration = {
     publicKeys: [
       {
         path: '/home/${caVMAdminUsername}/.ssh/authorized_keys'
-        keyData: caPublicSshKey.properties.publicKey
+        keyData: caDeploy ? caPublicSshKey.properties.publicKey : null
       }
     ]
   }
 }
-
-//var cloudinit5 = replace(cloudinit4, '[STEP_CA_INIT_COMMAND]', caINIT_COMMAND)
 
 //load the cloudinit template and perform template replacements
 var cloudinit0 = caVMCustomData
 var cloudinit1 = replace(cloudinit0, '[STEP_CA_VERSION]', caSTEP_CA_VERSION)
 var cloudinit2 = replace(cloudinit1, '[STEP_CLI_VERSION]', caSTEP_CLI_VERSION)
 var cloudinit3 = replace(cloudinit2, '[caVMAdminUsername]', caVMAdminUsername)
-var cloudinit4 = replace(cloudinit3, '[AZURE_CLIENT_ID]', caManagedIdentity.properties.clientId)
+var cloudinit4 = replace(cloudinit3, '[AZURE_CLIENT_ID]', caDeploy ? caManagedIdentity.properties.clientId : '')
 var cloudinit5 = replace(cloudinit4, '[CA_KEYVAULTNAME]', keyvaultName)
 var cloudinit6 = replace(cloudinit5, '[CA_ROOT_KEY_NAME]', ca_INIT_ROOT_KEY_NAME)
 var cloudinit7 = replace(cloudinit6, '[CA_INT_KEY_NAME]', ca_INIT_INTERMEDIATE_KEY_NAME)
@@ -119,11 +123,11 @@ var cloudinit10 = replace(cloudinit9, '[CA_INIT_PORT]', ca_INIT_PORT)
 var cloudinit11 = replace(cloudinit10, '[CA_INIT_PROVISIONER_JWT]', ca_INIT_PROVISIONER_JWT)
 var cloudinit = cloudinit11
 
-resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (virtualNetworkDeploy) {
+resource virtualnetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (virtualNetworkDeploy) {
   name: virtualNetworkName
   location: location
   properties: {
-    dhcpOptions: {
+    dhcpOptions: dnsResolverDeploy ? null : {
       dnsServers: virtualNetworkDNSServers
     }
     addressSpace: {
@@ -133,15 +137,36 @@ resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (
     }
     subnets: [
       {
+        name: 'dns'
+        properties: {
+          addressPrefix: '10.0.254.0/24'
+          delegations: [
+            {
+              name: 'Microsoft.Network/dnsResolvers'
+              properties: {
+                serviceName: 'Microsoft.Network/dnsResolvers'
+              }
+            }
+          ]
+
+        }
+      }
+      {
+        name: 'AzureBastionSubnet'
+        properties: {
+          addressPrefix: '10.0.253.0/24'
+        }
+      }
+      {
         name: 'ca'
         properties: {
-          addressPrefix: '10.0.0.0/24'
+          addressPrefix: '10.0.1.0/24'
         }
       }
       {
         name: 'database'
         properties: {
-          addressPrefix: '10.0.1.0/24'
+          addressPrefix: '10.0.2.0/24'
           delegations: [
             {
               name: 'Microsoft.DBforMySQL/flexibleServers'
@@ -155,16 +180,17 @@ resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (
       {
         name: 'keyvault'
         properties: {
-          addressPrefix: '10.0.2.0/24'
-        }
-      }
-      {
-        name: 'AzureBastionSubnet'
-        properties: {
           addressPrefix: '10.0.3.0/24'
         }
       }
     ]
+  }
+  resource subnetAzureBastion 'subnets' existing = {
+    name: 'AzureBastionSubnet'
+  }
+
+  resource subnetDns 'subnets' existing = {
+    name: 'dns'
   }
 
   resource subnetCA 'subnets' existing = {
@@ -179,12 +205,9 @@ resource pkiVirtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (
     name: 'keyvault'
   }
 
-  resource subnetAzureBastion 'subnets' existing = {
-    name: 'AzureBastionSubnet'
-  }
 }
 
-resource pipBastion 'Microsoft.Network/publicIPAddresses@2022-01-01' = if (bastionDeploy) {
+resource bastionPip 'Microsoft.Network/publicIPAddresses@2022-01-01' = if (bastionDeploy) {
   name: bastionName
   location: location
   tags: tags
@@ -217,10 +240,10 @@ resource bastion 'Microsoft.Network/bastionHosts@2022-01-01' = if (bastionDeploy
         name: 'IpConf'
         properties: {
           subnet: {
-            id: pkiVirtualNetwork::subnetAzureBastion.id
+            id: virtualnetwork::subnetAzureBastion.id
           }
           publicIPAddress: {
-            id: pipBastion.id
+            id: bastionPip.id
           }
         }
       }
@@ -228,7 +251,7 @@ resource bastion 'Microsoft.Network/bastionHosts@2022-01-01' = if (bastionDeploy
   }
 }
 
-resource caKeyvault 'Microsoft.KeyVault/vaults@2022-07-01' = if (keyvaultDeploy) {
+resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' = if (keyvaultDeploy) {
   name: keyvaultName
   location: location
   tags: tags
@@ -249,13 +272,6 @@ resource caKeyvault 'Microsoft.KeyVault/vaults@2022-07-01' = if (keyvaultDeploy)
     }
     tenantId: subscription().tenantId
   }
-
-  // resource keyVaultSecret 'secrets@2019-09-01' = {
-  //   name: 'caSecret'
-  //   properties: {
-  //     value: caINIT_PASSWORD
-  //   }
-  // }
 }
 
 resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-03-01' = if (keyvaultDeploy) {
@@ -266,13 +282,13 @@ resource keyvaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-03-01'
   ]
   properties: {
     subnet: {
-      id: pkiVirtualNetwork::subnetKeyvault.id
+      id: virtualnetwork::subnetKeyvault.id
     }
     privateLinkServiceConnections: [
       {
         name: 'caKeyvault'
         properties: {
-          privateLinkServiceId: caKeyvault.id
+          privateLinkServiceId: keyvault.id
           groupIds: [
             'vault'
           ]
@@ -307,38 +323,19 @@ resource keyvaultPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' =
     location: 'global'
     properties: {
       virtualNetwork: {
-        id: pkiVirtualNetwork.id
+        id: virtualnetwork.id
       }
       registrationEnabled: false
     }
   }
 }
 
-resource mysqlPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (dbDeploy) {
-  name: 'privatelink.mysql.database.azure.com'
-  location: 'global'
-  tags: tags
-  properties: {}
-
-  resource linkVirtualNetwork 'virtualNetworkLinks@2020-06-01' = {
-    name: 'postgresToVirtualNetwork'
-    location: 'global'
-    properties: {
-      virtualNetwork: {
-        id: pkiVirtualNetwork.id
-      }
-      registrationEnabled: false
-    }
-  }
+resource keyvaultAdminrole 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: '00482a5a-887f-4fb3-b363-3b7fe8e74483'
 }
 
-resource dbManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = if (dbDeploy) {
-  name: dbManagedIdentityName
-  location: location
-  tags: tags
-}
-
-resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = if (dbDeploy) {
+resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = if (databaseDeploy) {
   name: dbName
   location: location
   tags: tags
@@ -352,10 +349,34 @@ resource mysql 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = if (dbDeploy)
     version: dbVersion
     highAvailability: dbHighAvailability
     network: {
-      delegatedSubnetResourceId: pkiVirtualNetwork::subnetDatabase.id
+      delegatedSubnetResourceId: virtualnetwork::subnetDatabase.id
       privateDnsZoneResourceId: mysqlPrivateDNSZone.id
     }
   }
+}
+
+resource mysqlPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (databaseDeploy) {
+  name: 'privatelink.mysql.database.azure.com'
+  location: 'global'
+  tags: tags
+  properties: {}
+
+  resource linkVirtualNetwork 'virtualNetworkLinks@2020-06-01' = {
+    name: 'postgresToVirtualNetwork'
+    location: 'global'
+    properties: {
+      virtualNetwork: {
+        id: virtualnetwork.id
+      }
+      registrationEnabled: false
+    }
+  }
+}
+
+resource mysqlManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = if (databaseDeploy) {
+  name: dbManagedIdentityName
+  location: location
+  tags: tags
 }
 
 resource gallery 'Microsoft.Compute/galleries@2022-01-03' = if (galleryDeploy) {
@@ -367,7 +388,7 @@ resource gallery 'Microsoft.Compute/galleries@2022-01-03' = if (galleryDeploy) {
   }
 }
 
-resource galleryManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+resource galleryManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = if (galleryDeploy) {
   name: galleryManagedIdentityName
   location: location
   tags: tags
@@ -403,13 +424,13 @@ resource galleryImageBuilderRoleAssignment 'Microsoft.Authorization/roleAssignme
   name: guid(resourceGroup().id, subscription().id, 'Image Builder Service Image Contributor')
   scope: gallery
   properties: {
-    principalId: galleryManagedIdentity.properties.principalId
+    principalId: galleryDeploy ? galleryManagedIdentity.properties.principalId : ''
     roleDefinitionId: galleryImageBuilderRoleDefinition.id
     principalType: 'ServicePrincipal'
   }
 }
 
-resource stepcaImageDefinition 'Microsoft.Compute/galleries/images@2022-01-03' = if (galleryDeploy) {
+resource imageDefinitionCA 'Microsoft.Compute/galleries/images@2022-01-03' = if (galleryDeploy) {
   name: imageName
   location: location
   tags: tags
@@ -425,7 +446,7 @@ resource stepcaImageDefinition 'Microsoft.Compute/galleries/images@2022-01-03' =
   }
 }
 
-resource caPublicSshKey 'Microsoft.Compute/sshPublicKeys@2022-03-01' = {
+resource caPublicSshKey 'Microsoft.Compute/sshPublicKeys@2022-03-01' = if (caDeploy) {
   name: 'caVMSSHKey'
   location: location
   tags: tags
@@ -434,13 +455,13 @@ resource caPublicSshKey 'Microsoft.Compute/sshPublicKeys@2022-03-01' = {
   }
 }
 
-resource caManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+resource caManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = if (caDeploy) {
   name: caManagedIdentityName
   location: location
   tags: tags
 }
 
-resource cavmnic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
+resource cavmnic 'Microsoft.Network/networkInterfaces@2022-01-01' = if (caDeploy) {
   name: '${caVMName}-nic'
   location: location
   tags: tags
@@ -450,7 +471,7 @@ resource cavmnic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: pkiVirtualNetwork::subnetCA.id
+            id: virtualnetwork::subnetCA.id
           }
           privateIPAllocationMethod: 'Dynamic'
         }
@@ -462,7 +483,7 @@ resource cavmnic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
   }
 }
 
-resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
+resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2021-03-01' = if (caDeploy) {
   name: '${caVMName}-nsg'
   location: location
   properties: {
@@ -497,20 +518,20 @@ resource cavmnsg 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
   }
 }
 
-resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
+resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = if (caDeploy) {
   name: caVMName
   location: location
   tags: tags
   dependsOn: [
-    caKeyvault
+    keyvault
     cavmkeyvaultadmin
   ]
-  identity: {
+  identity: caDeploy ? {
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${caManagedIdentity.id}': {}
     }
-  }
+  } : null
   properties: {
     hardwareProfile: {
       vmSize: caVMSize
@@ -548,30 +569,68 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
       protectedSettings: {
         commandToExecute: 'echo "${ca_INIT_PASSWORD}" > /opt/stepcainstall/password.txt'
       }
-      // protectedSettingsFromKeyVault: {
-      //   keyVault: {
-      //     id: caKeyvault.id
-      //   }
-      //   "secretUrl":
-      // }
     }
   }
 }
 
-resource keyvaultAdminrole 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
-  scope: subscription()
-  name: '00482a5a-887f-4fb3-b363-3b7fe8e74483'
-}
-
-resource cavmkeyvaultadmin 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+resource cavmkeyvaultadmin 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = if (caDeploy) {
   name: guid(resourceGroup().id, subscription().id, 'Key Vault Administrator')
-  scope: caKeyvault
+  scope: keyvault
   properties: {
-    principalId: caManagedIdentity.properties.principalId
+    principalId: caDeploy ? caManagedIdentity.properties.principalId : ''
     roleDefinitionId: keyvaultAdminrole.id
     principalType: 'ServicePrincipal'
   }
 }
 
-output caManagedIdentityClientId string = caManagedIdentity.properties.clientId
+resource privateresolver 'Microsoft.Network/dnsResolvers@2020-04-01-preview' = if (virtualNetworkDeploy && dnsResolverDeploy) {
+  name: dnsResolverName
+  location: location
+  properties: {
+    virtualNetwork: {
+      id: virtualnetwork.id
+    }
+  }
+
+  resource outboundEndpoints 'outboundEndpoints@2020-04-01-preview' = {
+    name: 'external'
+    location: location
+    properties: {
+      subnet: {
+        id: virtualnetwork::subnetDns.id
+      }
+    }
+  }
+}
+
+resource dnsForwardRules 'Microsoft.Network/dnsForwardingRulesets@2020-04-01-preview' = if (virtualNetworkDeploy && dnsResolverDeploy) {
+  name: 'external'
+  location: location
+  properties: {
+    dnsResolverOutboundEndpoints: [
+      {
+        id: privateresolver::outboundEndpoints.id
+      }
+    ]
+  }
+
+  resource outbound 'forwardingRules@2020-04-01-preview' = {
+    name: 'outbound'
+    properties: {
+      targetDnsServers: dnsResolverOutboundTargetDNS
+      domainName: dnsResolverOutboundDNSDomainName
+    }
+  }
+
+  resource networkLink 'virtualNetworkLinks@2020-04-01-preview' = {
+    name: 'outbound'
+    properties: {
+      virtualNetwork: {
+        id: virtualnetwork.id
+      }
+    }
+  }
+}
+
+output caManagedIdentityClientId string = caDeploy ? caManagedIdentity.properties.clientId : ''
 output caCloudInit string = cloudinit

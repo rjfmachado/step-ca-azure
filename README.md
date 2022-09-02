@@ -11,32 +11,32 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
 * [Integrations](https://smallstep.com/docs/step-ca/integrations)
 * [Provisioners](https://smallstep.com/docs/step-ca/provisioners)
 
-
 ## Backlog
 
-- [ ] Move the backlog to GitHub
-- [ ] Add Private DNS Resolver
-- [ ] Configure the [Azure Provisioner](https://smallstep.com/docs/step-ca/provisioners#azure)
-- [ ] Configure the [ACME provisioner](https://smallstep.com/docs/step-ca/provisioners/#acme)
-- [ ] Configure the [OAuth/OIDC provider with Azure AD](https://smallstep.com/docs/step-ca/provisioners#oauthoidc-single-sign-on)
-- [ ] Add detailed deployment guidance, automation details and architecture diagram
-- [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
-  - [ ] [autocert](https://github.com/smallstep/autocert)
-  - [ ] [Virtual Machines](https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/)
-  - [ ] [ACME clients](https://smallstep.com/docs/tutorials/acme-protocol-acme-clients)
-- [ ] Review public access/firewall for services behind Private Endpoint 
-- [ ] Review Key Vault RBAC for minimum rights required
-- [ ] Review Step provisioners and Provisioner management <https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management>
-- [ ] Add MySQL as Database
-- [ ] Test Azure Managed HSM and Azure Dedicated HSM
-- [ ] Add High Availability to MySQL  
-- [ ] Store password, ca.json and defaults.json
-- [ ] Add High Availability to step-ca  
-- [ ] Add VMSS base image
-- [ ] Azure Monitor support, metrics and logs
-- [ ] Add deploy to azure experience <https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173>
-- [ ] SSH and Azure AD SSO <https://smallstep.com/blog/diy-single-sign-on-for-ssh/>
-- [ ] AKS version [smallstep/step-ca](https://hub.docker.com/r/smallstep/step-ca) and [Helm Chart](https://artifacthub.io/packages/helm/smallstep/step-certificates)
+* [ ] Move the backlog to GitHub
+* [ ] Add detailed deployment guidance, automation details and architecture diagram
+  * [ ] Add feature set details and mapping to Azure services.
+* [ ] Configure the [Azure Provisioner](https://smallstep.com/docs/step-ca/provisioners#azure)
+* [ ] Configure the [ACME provisioner](https://smallstep.com/docs/step-ca/provisioners/#acme)
+* [ ] Configure the [OAuth/OIDC provider with Azure AD](https://smallstep.com/docs/step-ca/provisioners#oauthoidc-single-sign-on)
+* [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
+  * [ ] [autocert](https://github.com/smallstep/autocert)
+  * [ ] [Virtual Machines](https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/)
+  * [ ] [ACME clients](https://smallstep.com/docs/tutorials/acme-protocol-acme-clients)
+  * [ ] [cert-manager](https://cert-manager.io/)
+* [ ] Review public access/firewall for services behind Private Endpoint 
+* [ ] Review Key Vault RBAC for minimum rights required
+* [ ] Review Step provisioners and [Remote Provisioner management](https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management)
+* [ ] Add MySQL as Database
+* [ ] Test Azure Managed HSM and Azure Dedicated HSM
+* [ ] Add High Availability to MySQL  
+* [ ] Store password, ca.json and defaults.json
+* [ ] Add High Availability to step-ca  
+* [ ] Add VMSS base image
+* [ ] Azure Monitor support, metrics and logs
+* [ ] Add Deploy to Azure portal experience
+* [ ] [SSH and Azure AD SSO](https://smallstep.com/blog/diy-single-sign-on-for-ssh)
+* [ ] AKS version [smallstep/step-ca](https://hub.docker.com/r/smallstep/step-ca) and [Helm Chart](https://artifacthub.io/packages/helm/smallstep/step-certificates)
 
 ## Deploying the solution
 
@@ -61,6 +61,8 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
     | CA_INIT_NAME | | CA Name |
     | CA_INIT_DNS | | The DNS fully qualified name of the CA |
     | CA_INIT_PROVISIONER_JWK | | The name of the default JWK provisioner|
+    | AZURE_DNS_RESOLVER_OUTBOUND_TARGET_DNS || A json object array of [targetdnsserver](https://docs.microsoft.com/en-us/rest/api/dns/dnsresolver/forwarding-rules/create-or-update?tabs=HTTP#targetdnsserver) objects.|
+    | AZURE_DNS_RESOLVER_OUTBOUND_DOMAIN | | the target domain with traling dot.|
 
     *For more information about the CA_INIT_ parameters, please refer to the [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init).*  
 
@@ -91,6 +93,12 @@ export CA_VM_NAME=$(az deployment group list -g pki -o tsv --query [0].propertie
 az network bastion ssh -n $AZURE_BASTION -g $AZURE_RG_NAME \
   --auth-type ssh-key --username $CA_ADMIN_NAME --ssh-key ~/.ssh/id_rsa \
   --target-resource-id $(az vm show -g $AZURE_RG_NAME --name $CA_VM_NAME -o tsv --query id)
+```
+
+Once connected, you can verify the daemon state with:
+
+```bash
+systemctl status step-ca
 ```
 
 ## Requirements
