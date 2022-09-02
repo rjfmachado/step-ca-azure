@@ -13,31 +13,30 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
 
 ## Backlog
 
-- [ ] Move the backlog to GitHub
-- [ ] Add detailed deployment guidance, automation details and architecture diagram
-  - [ ] Add feature set details and mapping to Azure services.
-- [ ] Configure the [Azure Provisioner](https://smallstep.com/docs/step-ca/provisioners#azure)
-- [ ] Configure the [ACME provisioner](https://smallstep.com/docs/step-ca/provisioners/#acme)
-- [ ] Configure the [OAuth/OIDC provider with Azure AD](https://smallstep.com/docs/step-ca/provisioners#oauthoidc-single-sign-on)
-
-- [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
-  - [ ] [autocert](https://github.com/smallstep/autocert)
-  - [ ] [Virtual Machines](https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/)
-  - [ ] [ACME clients](https://smallstep.com/docs/tutorials/acme-protocol-acme-clients)
-  - [ ] [cert-manager](https://cert-manager.io/)
-- [ ] Review public access/firewall for services behind Private Endpoint 
-- [ ] Review Key Vault RBAC for minimum rights required
-- [ ] Review Step provisioners and [Remote Provisioner management](https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management)
-- [ ] Add MySQL as Database
-- [ ] Test Azure Managed HSM and Azure Dedicated HSM
-- [ ] Add High Availability to MySQL  
-- [ ] Store password, ca.json and defaults.json
-- [ ] Add High Availability to step-ca  
-- [ ] Add VMSS base image
-- [ ] Azure Monitor support, metrics and logs
-- [ ] Add Deploy to Azure portal experience
-- [ ] [SSH and Azure AD SSO](https://smallstep.com/blog/diy-single-sign-on-for-ssh)
-- [ ] AKS version [smallstep/step-ca](https://hub.docker.com/r/smallstep/step-ca) and [Helm Chart](https://artifacthub.io/packages/helm/smallstep/step-certificates)
+* [ ] Move the backlog to GitHub
+* [ ] Add detailed deployment guidance, automation details and architecture diagram
+  * [ ] Add feature set details and mapping to Azure services.
+* [ ] Configure the [Azure Provisioner](https://smallstep.com/docs/step-ca/provisioners#azure)
+* [ ] Configure the [ACME provisioner](https://smallstep.com/docs/step-ca/provisioners/#acme)
+* [ ] Configure the [OAuth/OIDC provider with Azure AD](https://smallstep.com/docs/step-ca/provisioners#oauthoidc-single-sign-on)
+* [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
+  * [ ] [autocert](https://github.com/smallstep/autocert)
+  * [ ] [Virtual Machines](https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/)
+  * [ ] [ACME clients](https://smallstep.com/docs/tutorials/acme-protocol-acme-clients)
+  * [ ] [cert-manager](https://cert-manager.io/)
+* [ ] Review public access/firewall for services behind Private Endpoint 
+* [ ] Review Key Vault RBAC for minimum rights required
+* [ ] Review Step provisioners and [Remote Provisioner management](https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management)
+* [ ] Add MySQL as Database
+* [ ] Test Azure Managed HSM and Azure Dedicated HSM
+* [ ] Add High Availability to MySQL  
+* [ ] Store password, ca.json and defaults.json
+* [ ] Add High Availability to step-ca  
+* [ ] Add VMSS base image
+* [ ] Azure Monitor support, metrics and logs
+* [ ] Add Deploy to Azure portal experience
+* [ ] [SSH and Azure AD SSO](https://smallstep.com/blog/diy-single-sign-on-for-ssh)
+* [ ] AKS version [smallstep/step-ca](https://hub.docker.com/r/smallstep/step-ca) and [Helm Chart](https://artifacthub.io/packages/helm/smallstep/step-certificates)
 
 ## Deploying the solution
 
