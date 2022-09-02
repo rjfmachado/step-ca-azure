@@ -17,7 +17,7 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
 * [ ] Add detailed deployment guidance, automation details and architecture diagram
   * [ ] Add feature set details and mapping to Azure services.
 * [ ] Configure the [Azure Provisioner](https://smallstep.com/docs/step-ca/provisioners#azure)
-* [ ] Configure the [ACME provisioner](https://smallstep.com/docs/step-ca/provisioners/#acme)
+* [ ] Configure the [ACME provisioner](https://smallstep.com/docs/step-ca/provisioners/#acme), [Run your own private CA & ACME server using step-ca](https://smallstep.com/blog/private-acme-server/)
 * [ ] Configure the [OAuth/OIDC provider with Azure AD](https://smallstep.com/docs/step-ca/provisioners#oauthoidc-single-sign-on)
 * [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
   * [ ] [autocert](https://github.com/smallstep/autocert)
