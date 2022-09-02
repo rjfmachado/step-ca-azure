@@ -62,6 +62,8 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
     | CA_INIT_NAME | | CA Name |
     | CA_INIT_DNS | | The DNS fully qualified name of the CA |
     | CA_INIT_PROVISIONER_JWK | | The name of the default JWK provisioner|
+    | AZURE_DNS_RESOLVER_OUTBOUND_TARGET_DNS || A json object array of [targetdnsserver](https://docs.microsoft.com/en-us/rest/api/dns/dnsresolver/forwarding-rules/create-or-update?tabs=HTTP#targetdnsserver) objects.|
+    | AZURE_DNS_RESOLVER_OUTBOUND_DOMAIN | | the target domain with traling dot.|
 
     *For more information about the CA_INIT_ parameters, please refer to the [step ca init documentation](https://smallstep.com/docs/step-cli/reference/ca/init).*  
 
