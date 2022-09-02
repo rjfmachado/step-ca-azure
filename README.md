@@ -96,6 +96,12 @@ az network bastion ssh -n $AZURE_BASTION -g $AZURE_RG_NAME \
   --target-resource-id $(az vm show -g $AZURE_RG_NAME --name $CA_VM_NAME -o tsv --query id)
 ```
 
+Finally, you can verify the daemon state with:
+
+```bash
+systemctl status step-ca
+```
+
 ## Requirements
 
 Note: these are included in the provide dev container/codespaces.
