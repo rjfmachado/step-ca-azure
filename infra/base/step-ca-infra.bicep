@@ -8,7 +8,7 @@ param tags object = {
 
 param galleryDeploy bool = false
 param virtualNetworkDeploy bool = true
-param dnsResolverDeploy bool = false
+param dnsResolverDeploy bool = true
 param keyvaultDeploy bool = true
 param bastionDeploy bool = true
 param databaseDeploy bool = false
@@ -40,7 +40,7 @@ param virtualNetworkName string = 'stepca'
 param virtualNetworkDNSServers array = []
 
 param dnsResolverName string = 'dnsresolver'
-param dnsResolverOutboundDNS array
+param dnsResolverOutboundTargetDNS array
 param dnsResolverOutboundDNSDomainName string
 
 param keyvaultName string
@@ -127,7 +127,7 @@ resource virtualnetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (vir
   name: virtualNetworkName
   location: location
   properties: {
-    dhcpOptions: {
+    dhcpOptions: dnsResolverDeploy ? null : {
       dnsServers: virtualNetworkDNSServers
     }
     addressSpace: {
@@ -617,7 +617,7 @@ resource dnsForwardRules 'Microsoft.Network/dnsForwardingRulesets@2020-04-01-pre
   resource outbound 'forwardingRules@2020-04-01-preview' = {
     name: 'outbound'
     properties: {
-      targetDnsServers: dnsResolverOutboundDNS
+      targetDnsServers: dnsResolverOutboundTargetDNS
       domainName: dnsResolverOutboundDNSDomainName
     }
   }
