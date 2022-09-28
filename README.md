@@ -28,6 +28,7 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
 * [ ] Review Key Vault RBAC for minimum rights required
 * [ ] Review Step provisioners and [Remote Provisioner management](https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management)
 * [ ] Add MySQL as Database
+  * [ ] [Use Azure Active Directory for authenticating with MySQL](https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-azure-ad-authentication)
 * [ ] Test Azure Managed HSM and Azure Dedicated HSM
 * [ ] Add High Availability to MySQL  
 * [ ] Improve CA initialization during deployment via script or ACI.
