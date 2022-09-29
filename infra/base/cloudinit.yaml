@@ -2,6 +2,7 @@
 version: v1
 package-update: true
 package_upgrade: true
+fqdn: [CA_INIT_DNS]
 packages:
   - jq
 write_files:
