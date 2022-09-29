@@ -9,6 +9,7 @@ param tags object = {
 param galleryDeploy bool = false
 param virtualNetworkDeploy bool = true
 param dnsResolverDeploy bool = true
+param dnsZonesDeploy bool = true
 param keyvaultDeploy bool = true
 param bastionDeploy bool = true
 param databaseDeploy bool = false
@@ -16,6 +17,8 @@ param caDeploy bool = true
 
 param galleryName string = 'stepca'
 param galleryManagedIdentityName string = 'galleryManagedIdentity'
+
+param pkiDnsZoneName string
 
 param imageName string = 'stepca'
 param imageDescription string = 'step-ca on ubuntu linux'
@@ -628,6 +631,36 @@ resource dnsForwardRules 'Microsoft.Network/dnsForwardingRulesets@2020-04-01-pre
       virtualNetwork: {
         id: virtualnetwork.id
       }
+    }
+  }
+}
+
+resource pkiPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (dnsZonesDeploy) {
+  name: pkiDnsZoneName
+  location: 'global'
+  tags: tags
+  properties: {}
+
+  resource linkVirtualNetwork 'virtualNetworkLinks@2020-06-01' = if (dnsZonesDeploy) {
+    name: 'keyvaultToVirtualNetwork'
+    location: 'global'
+    properties: {
+      virtualNetwork: {
+        id: virtualnetwork.id
+      }
+      registrationEnabled: false
+    }
+  }
+
+  resource pkiARecord 'A@2020-06-01' = if (dnsZonesDeploy) {
+    name: split(ca_INIT_DNS, '.')[0]
+    properties: {
+      ttl: 30
+      aRecords: [
+        {
+          ipv4Address: cavmnic.properties.ipConfigurations[0].properties.privateIPAddress
+        }
+      ]
     }
   }
 }
