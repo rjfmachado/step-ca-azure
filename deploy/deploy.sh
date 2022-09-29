@@ -10,7 +10,6 @@
 [[ -z "${CA_INIT_DNS}" ]] && export CA_INIT_DNS='your DNS fqdn'
 [[ -z "${CA_INIT_PROVISIONER_JWT}" ]] && export CA_INIT_PROVISIONER_JWT="$(az account show -o tsv --query user.name)"
 
-
 az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION -o none
 az deployment group create -g $AZURE_RG_NAME -o none \
   --template-file infra/base/step-ca-infra.bicep \
