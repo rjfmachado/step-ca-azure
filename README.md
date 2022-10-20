@@ -109,3 +109,10 @@ Note: these are included in the provide dev container/codespaces.
 
 - [GitHub CLI](https://cli.github.com/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+
+## Temporary
+
+https://github.com/Azure/Enterprise-Scale/blob/main/eslzArm/eslz-portal.json
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/managed-applications/create-uidefinition-overview
+https://arsenvlad.medium.com/azure-createuidefinition-json-9bf895642f14
+https://techcommunity.microsoft.com/t5/azure-governance-and-management/using-azure-templatespecs-with-a-custom-ui/ba-p/3586173
