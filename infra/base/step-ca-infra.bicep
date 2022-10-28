@@ -528,6 +528,7 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = if (caDeploy) {
   dependsOn: [
     keyvault
     cavmkeyvaultadmin
+    privateresolver
   ]
   identity: caDeploy ? {
     type: 'UserAssigned'
