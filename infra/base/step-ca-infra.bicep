@@ -140,9 +140,9 @@ resource virtualnetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (vir
     }
     subnets: [
       {
-        name: 'dns'
+        name: 'outbounddns'
         properties: {
-          addressPrefix: '10.0.254.0/24'
+          addressPrefix: '10.0.254.0/25'
           delegations: [
             {
               name: 'Microsoft.Network/dnsResolvers'
@@ -151,7 +151,20 @@ resource virtualnetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (vir
               }
             }
           ]
-
+        }
+      }
+      {
+        name: 'inbounddns'
+        properties: {
+          addressPrefix: '10.0.254.128/25'
+          delegations: [
+            {
+              name: 'Microsoft.Network/dnsResolvers'
+              properties: {
+                serviceName: 'Microsoft.Network/dnsResolvers'
+              }
+            }
+          ]
         }
       }
       {
@@ -192,8 +205,12 @@ resource virtualnetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (vir
     name: 'AzureBastionSubnet'
   }
 
-  resource subnetDns 'subnets' existing = {
-    name: 'dns'
+  resource subnetinboundDns 'subnets' existing = {
+    name: 'inbounddns'
+  }
+
+  resource subnetoutboundDns 'subnets' existing = {
+    name: 'outbounddns'
   }
 
   resource subnetCA 'subnets' existing = {
@@ -528,6 +545,8 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = if (caDeploy) {
   dependsOn: [
     keyvault
     cavmkeyvaultadmin
+    keyvaultPrivateDNSZone
+    keyvaultPrivateEndpoint
     privateresolver
   ]
   identity: caDeploy ? {
@@ -601,8 +620,23 @@ resource privateresolver 'Microsoft.Network/dnsResolvers@2020-04-01-preview' = i
     location: location
     properties: {
       subnet: {
-        id: virtualnetwork::subnetDns.id
+        id: virtualnetwork::subnetoutboundDns.id
       }
+    }
+  }
+
+  resource inboundEndpoints 'inboundEndpoints@2020-04-01-preview' = {
+    name: 'internal'
+    location: location
+    properties: {
+      ipConfigurations: [
+        {
+          subnet: {
+            id: virtualnetwork::subnetinboundDns.id
+          }
+          privateIpAllocationMethod: 'Dynamic'
+        }
+      ]
     }
   }
 }
@@ -653,13 +687,13 @@ resource pkiPrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (
     }
   }
 
-  resource pkiARecord 'A@2020-06-01' = if (dnsZonesDeploy) {
+  resource pkiARecord 'A@2020-06-01' = if (dnsZonesDeploy && caDeploy) {
     name: split(ca_INIT_DNS, '.')[0]
     properties: {
       ttl: 30
       aRecords: [
         {
-          ipv4Address: cavmnic.properties.ipConfigurations[0].properties.privateIPAddress
+          ipv4Address: caDeploy ? cavmnic.properties.ipConfigurations[0].properties.privateIPAddress : null
         }
       ]
     }
