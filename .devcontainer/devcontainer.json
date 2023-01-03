@@ -10,11 +10,20 @@
 	},
 	"remoteUser": "vscode",
 	"features": {
-		"kubectl-helm-minikube": "1.23",
-		"github-cli": "latest",
-		"azure-cli": "latest",
-		"terraform": "latest",
-		"sshd": "latest"
+		"ghcr.io/rjfmachado/devcontainer-features/cloud-native:1": {
+			"kubectl": "latest",
+			"helm": "none",
+			"azwi": "none",
+			"kubelogin": "latest",
+			"flux": "none",
+			"cilium": "none"
+		},
+		"ghcr.io/devcontainers/features/azure-cli:1": {
+			"extensions": "ssh, aks-preview",
+			"installBicep": true
+		},
+		"ghcr.io/devcontainers/features/sshd:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 	"extensions": [
 		"cschleiden.vscode-github-actions",
@@ -27,6 +36,5 @@
 		"ms-azuretools.vscode-azureresourcegroups",
 		"heaths.vscode-guid",
 		"donjayamanne.githistory"
-	],
-	"postCreateCommand": "az bicep install && az extension add --name ssh"
+	]
 }
