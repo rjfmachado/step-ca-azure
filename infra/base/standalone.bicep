@@ -280,13 +280,16 @@ resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' = if (keyvaultDeploy) {
     keyvaultPrivateDNSZone
   ]
   properties: {
-    enabledForDeployment: true
-    enabledForDiskEncryption: true
-    enabledForTemplateDeployment: true
+    enabledForDeployment: false
+    enabledForDiskEncryption: false
+    enabledForTemplateDeployment: false
     enablePurgeProtection: true
     enableRbacAuthorization: true
     enableSoftDelete: false
     publicNetworkAccess: 'disabled'
+    networkAcls: {
+      bypass: 'None'
+    }
     sku: {
       family: 'A'
       name: 'standard'
@@ -549,7 +552,7 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = if (caDeploy) {
     keyvaultPrivateDNSZone
     keyvaultPrivateEndpoint
     privateresolver
-    checkKeyvaultRBAC
+    //checkKeyvaultRBAC
   ]
   identity: caDeploy ? {
     type: 'UserAssigned'
@@ -608,36 +611,37 @@ resource cavmkeyvaultadmin 'Microsoft.Authorization/roleAssignments@2020-10-01-p
   }
 }
 
-resource checkKeyvaultRBAC 'Microsoft.Resources/deploymentScripts@2020-10-01' = if (caDeploy) {
-  name: 'checkKeyvaultRBAC'
-  location: location
-  dependsOn: [
-    cavmkeyvaultadmin
-  ]
-  identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: caDeploy ? {
-      '${caManagedIdentity.id}': {}
-    } : null
-  }
-  kind: 'AzureCLI'
-  properties: {
-    azCliVersion: '2.42.0'
-    retentionInterval: 'P1D'
-    cleanupPreference: 'OnSuccess'
-    timeout: 'PT30M'
-    forceUpdateTag: utcValue
-    environmentVariables: [
-      {
-        name: 'KEYVAULT_NAME'
-        value: keyvaultName
-      }
-    ]
-    scriptContent: '''
-      az keyvault wait -n $KEYVAULT_NAME --created --interval 30 --verbose
-    '''
-  }
-}
+// resource checkKeyvaultRBAC 'Microsoft.Resources/deploymentScripts@2020-10-01' = if (caDeploy) {
+//   name: 'checkKeyvaultRBAC'
+//   location: location
+//   dependsOn: [
+//     cavmkeyvaultadmin
+//   ]
+//   identity: {
+//     type: 'UserAssigned'
+//     userAssignedIdentities: caDeploy ? {
+//       '${caManagedIdentity.id}': {}
+//     } : null
+//   }
+//   kind: 'AzureCLI'
+//   properties: {
+//     azCliVersion: '2.42.0'
+//     retentionInterval: 'P1D'
+//     cleanupPreference: 'OnSuccess'
+//     timeout: 'PT30M'
+//     forceUpdateTag: utcValue
+//     environmentVariables: [
+//       {
+//         name: 'KEYVAULT_NAME'
+//         value: keyvaultName
+//       }
+//     ]
+//     scriptContent: '''
+//       az keyvault wait -n $KEYVAULT_NAME --created --interval 30 --verbose
+//       #az keyvault secret list --vault-name $KEYVAULT_NAME --verbose
+//     '''
+//   }
+// }
 
 resource privateresolver 'Microsoft.Network/dnsResolvers@2020-04-01-preview' = if (virtualNetworkDeploy && dnsResolverDeploy) {
   name: dnsResolverName

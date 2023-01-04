@@ -5,6 +5,7 @@ package_upgrade: true
 fqdn: [CA_INIT_DNS]
 packages:
   - jq
+  - azure-cli
 write_files:
   - path: /etc/environment
     content: |
@@ -12,6 +13,11 @@ write_files:
       STEP_CLI_VERSION="[STEP_CLI_VERSION]"
       AZURE_CLIENT_ID=[AZURE_CLIENT_ID]
     append: true
+  - path: /opt/stepcainstall/testkvaccess.sh
+    content: |
+      az login --identity
+      az keyvault secret list --vault-name [CA_KEYVAULTNAME] --verbose
+    permissions: "0777"
   - path: /opt/stepcainstall/initstepca.sh
     content: |
       step ca init --deployment-type="standalone" --name="[CA_INIT_NAME]" --dns="[CA_INIT_DNS]" --address="[CA_INIT_PORT]" --provisioner="[CA_INIT_PROVISIONER_JWT]" --kms="azurekms" --kms-root="azurekms:name=[CA_ROOT_KEY_NAME];vault=[CA_KEYVAULTNAME]" --kms-intermediate="azurekms:name=[CA_INT_KEY_NAME];vault=[CA_KEYVAULTNAME]" --no-db --password-file="/opt/stepcainstall/password.txt"
@@ -99,5 +105,6 @@ runcmd:
       "https://dl.step.sm/gh-release/certificates/docs-ca-install/v[STEP_CA_VERSION]/step-ca_[STEP_CA_VERSION]_amd64.deb",
     ]
   - ["dpkg", "-i", "step-ca_[STEP_CA_VERSION]_amd64.deb"]
+  - ["/opt/stepcainstall/testkvaccess.sh"]
   - ["/opt/stepcainstall/initstepca.sh"]
   - ["/opt/stepcainstall/setupdaemon.sh"]
