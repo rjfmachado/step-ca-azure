@@ -19,12 +19,12 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
 * [ ] Configure the [Azure Provisioner](https://smallstep.com/docs/step-ca/provisioners#azure)
 * [ ] Configure the [ACME provisioner](https://smallstep.com/docs/step-ca/provisioners/#acme), [Run your own private CA & ACME server using step-ca](https://smallstep.com/blog/private-acme-server/)
 * [ ] Configure the [OAuth/OIDC provider with Azure AD](https://smallstep.com/docs/step-ca/provisioners#oauthoidc-single-sign-on)
-* [ ] Add client scenarios, VM, AKS, https://github.com/shibayan/keyvault-acmebot
+* [ ] Add client scenarios, VM, AKS, <https://github.com/shibayan/keyvault-acmebot>
   * [ ] [autocert](https://github.com/smallstep/autocert)
   * [ ] [Virtual Machines](https://smallstep.com/blog/embarrassingly-easy-certificates-on-aws-azure-gcp/)
   * [ ] [ACME clients](https://smallstep.com/docs/tutorials/acme-protocol-acme-clients)
   * [ ] [cert-manager](https://cert-manager.io/)
-* [ ] Review public access/firewall for services behind Private Endpoint 
+* [ ] Review public access/firewall for services behind Private Endpoint
 * [ ] Review Key Vault RBAC for minimum rights required
 * [ ] Review Step provisioners and [Remote Provisioner management](https://smallstep.com/docs/step-ca/provisioners#remote-provisioner-management)
 * [ ] Add MySQL as Database
@@ -58,7 +58,7 @@ A sample implementation of a PKI with a standalone Certificate Authority with [s
     | CA_CAVMNAME | | Virtual Machine name |
     | CA_KEYVAULTNAME | | Key Vault name |
     | CA_SSH_PUBLIC_KEY | | SSH Public Key |
-    | DB_ADMIN_PASSWORD | | Database admin user password | 
+    | DB_ADMIN_PASSWORD | | Database admin user password |
     | CA_INIT_PASSWORD | | Parameter for step ca init --password-file contents |
     | CA_INIT_NAME | | CA Name |
     | CA_INIT_DNS | | The DNS fully qualified name of the CA |
@@ -108,5 +108,5 @@ systemctl status step-ca
 
 Note: these are included in the provide dev container/codespaces.
 
-- [GitHub CLI](https://cli.github.com/)
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+* [GitHub CLI](https://cli.github.com/)
+* [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)

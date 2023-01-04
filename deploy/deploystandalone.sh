@@ -12,7 +12,7 @@
 
 az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION -o none
 az deployment group create -g $AZURE_RG_NAME -o none \
-  --template-file infra/base/step-ca-infra.bicep \
+  --template-file infra/base/standalone.bicep \
   --parameters caVMName="$CA_CAVMNAME" \
   --parameters keyvaultName="$CA_KEYVAULTNAME" \
   --parameters caVMPublicSshKey="$CA_SSH_PUBLIC_KEY" \

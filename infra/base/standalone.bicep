@@ -99,6 +99,8 @@ param caVMSize string = 'Standard_B2s'
 
 param caManagedIdentityName string = 'caManagedIdentity'
 
+param utcValue string = utcNow()
+
 var caVMlinuxConfiguration = {
   disablePasswordAuthentication: true
   ssh: {
@@ -548,6 +550,7 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = if (caDeploy) {
     keyvaultPrivateDNSZone
     keyvaultPrivateEndpoint
     privateresolver
+    checkKeyvaultRBAC
   ]
   identity: caDeploy ? {
     type: 'UserAssigned'
@@ -603,6 +606,29 @@ resource cavmkeyvaultadmin 'Microsoft.Authorization/roleAssignments@2020-10-01-p
     principalId: caDeploy ? caManagedIdentity.properties.principalId : ''
     roleDefinitionId: keyvaultAdminrole.id
     principalType: 'ServicePrincipal'
+  }
+}
+
+resource checkKeyvaultRBAC 'Microsoft.Resources/deploymentScripts@2020-10-01' = if (caDeploy) {
+  name: 'checkKeyvaultRBAC'
+  location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: caDeploy ? {
+      '${caManagedIdentity.id}': {}
+    } : null
+  }
+  kind: 'AzureCLI'
+  properties: {
+    azCliVersion: '2.42.0'
+    retentionInterval: 'P1D'
+    cleanupPreference: 'OnExpiration'
+    timeout: 'PT30M'
+    forceUpdateTag: utcValue
+    scriptContent: '''
+      sleep 30s
+      #update to check access to kv
+    '''
   }
 }
 
