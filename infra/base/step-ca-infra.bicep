@@ -8,7 +8,7 @@ param tags object = {
 
 param galleryDeploy bool = false
 param virtualNetworkDeploy bool = true
-param dnsResolverDeploy bool = true
+param dnsResolverDeploy bool = false
 param dnsZonesDeploy bool = true
 param keyvaultDeploy bool = true
 param bastionDeploy bool = true
