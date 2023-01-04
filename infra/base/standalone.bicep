@@ -47,7 +47,6 @@ param dnsResolverOutboundTargetDNS array
 param dnsResolverOutboundDNSDomainName string
 
 param keyvaultName string
-//@secure()
 
 param bastionName string = 'caBastion'
 param bastionSku string = 'Standard'
@@ -612,6 +611,9 @@ resource cavmkeyvaultadmin 'Microsoft.Authorization/roleAssignments@2020-10-01-p
 resource checkKeyvaultRBAC 'Microsoft.Resources/deploymentScripts@2020-10-01' = if (caDeploy) {
   name: 'checkKeyvaultRBAC'
   location: location
+  dependsOn: [
+    cavmkeyvaultadmin
+  ]
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: caDeploy ? {
@@ -622,12 +624,17 @@ resource checkKeyvaultRBAC 'Microsoft.Resources/deploymentScripts@2020-10-01' = 
   properties: {
     azCliVersion: '2.42.0'
     retentionInterval: 'P1D'
-    cleanupPreference: 'OnExpiration'
+    cleanupPreference: 'OnSuccess'
     timeout: 'PT30M'
     forceUpdateTag: utcValue
+    environmentVariables: [
+      {
+        name: 'KEYVAULT_NAME'
+        value: keyvaultName
+      }
+    ]
     scriptContent: '''
-      sleep 30s
-      #update to check access to kv
+      az keyvault wait -n $KEYVAULT_NAME --created --interval 30 --verbose
     '''
   }
 }
