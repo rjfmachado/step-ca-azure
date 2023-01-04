@@ -2,6 +2,7 @@
 [[ -z "${AZURE_LOCATION}" ]] && export AZURE_LOCATION='westeurope'
 [[ -z "${AZURE_DNS_RESOLVER_OUTBOUND_TARGET_DNS}" ]] && export AZURE_DNS_RESOLVER_OUTBOUND_TARGET_DNS="[{\"ipAddress\": \"192.168.0.11\"},{\"ipAddress\": \"192.168.0.13\"}]"
 [[ -z "${AZURE_DNS_RESOLVER_OUTBOUND_DOMAIN}" ]] && export AZURE_DNS_RESOLVER_OUTBOUND_DOMAIN='test.com.'
+[[ -z "${AZURE_DNS_PKI_ZONE}" ]] && export AZURE_DNS_PKI_ZONE='pki.myorg.com'
 [[ -z "${CA_INIT_DNS}" ]] && export CA_INIT_DNS='your DNS fqdn'
 [[ -z "${CA_SSH_PUBLIC_KEY}" ]] && export CA_SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
 [[ -z "${DB_ADMIN_PASSWORD}" ]] && export DB_ADMIN_PASSWORD='your Database admin password'
@@ -21,4 +22,5 @@ az deployment group create -g $AZURE_RG_NAME -o none \
   --parameters ca_INIT_DNS="$CA_INIT_DNS" \
   --parameters dbLoginPassword="$DB_ADMIN_PASSWORD" \
   --parameters dnsResolverOutboundTargetDNS="$AZURE_DNS_RESOLVER_OUTBOUND_TARGET_DNS" \
-  --parameters dnsResolverOutboundDNSDomainName="$AZURE_DNS_RESOLVER_OUTBOUND_DOMAIN"
+  --parameters dnsResolverOutboundDNSDomainName="$AZURE_DNS_RESOLVER_OUTBOUND_DOMAIN" \
+  --parameters pkiDnsZoneName="$AZURE_DNS_PKI_ZONE"
