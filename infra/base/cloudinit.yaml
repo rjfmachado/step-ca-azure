@@ -121,6 +121,6 @@ runcmd:
       "https://dl.step.sm/gh-release/certificates/docs-ca-install/v[STEP_CA_VERSION]/step-ca_[STEP_CA_VERSION]_amd64.deb",
     ]
   - ["dpkg", "-i", "step-ca_[STEP_CA_VERSION]_amd64.deb"]
-  - ["/opt/stepcainstall/testkvaccess.sh"]
+  - ["bash", "/opt/stepcainstall/testkvaccess.sh"]
   - ["/opt/stepcainstall/initstepca.sh"]
   - ["/opt/stepcainstall/setupdaemon.sh"]
