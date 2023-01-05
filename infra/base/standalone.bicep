@@ -98,7 +98,7 @@ param caVMSize string = 'Standard_B2s'
 
 param caManagedIdentityName string = 'caManagedIdentity'
 
-param utcValue string = utcNow()
+//param utcValue string = utcNow()
 
 var caVMlinuxConfiguration = {
   disablePasswordAuthentication: true
@@ -125,7 +125,8 @@ var cloudinit8 = replace(cloudinit7, '[CA_INIT_NAME]', ca_INIT_NAME)
 var cloudinit9 = replace(cloudinit8, '[CA_INIT_DNS]', ca_INIT_DNS)
 var cloudinit10 = replace(cloudinit9, '[CA_INIT_PORT]', ca_INIT_PORT)
 var cloudinit11 = replace(cloudinit10, '[CA_INIT_PROVISIONER_JWT]', ca_INIT_PROVISIONER_JWT)
-var cloudinit = cloudinit11
+var cloudinit12 = replace(cloudinit11, '[KV_URI]', keyvault.id)
+var cloudinit = cloudinit12
 
 resource virtualnetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = if (virtualNetworkDeploy) {
   name: virtualNetworkName
@@ -547,12 +548,10 @@ resource cavm 'Microsoft.Compute/virtualMachines@2022-03-01' = if (caDeploy) {
   location: location
   tags: tags
   dependsOn: [
-    keyvault
     cavmkeyvaultadmin
     keyvaultPrivateDNSZone
     keyvaultPrivateEndpoint
     privateresolver
-    //checkKeyvaultRBAC
   ]
   identity: caDeploy ? {
     type: 'UserAssigned'
