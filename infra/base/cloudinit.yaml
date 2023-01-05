@@ -17,19 +17,15 @@ write_files:
       echo "Getting Azure token for Managed Identity"
       TOKEN=$(curl -H Metadata:true "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com/&client_id=[AZURE_CLIENT_ID]" -s | jq -r .access_token)
       echo "Check access to Key Vault"
-
       KV_ACCESS=false
-
       while [ $KV_ACCESS==false ]
       do
         RESULT=$(curl https://management.azure.com[KV_URI]/?api-version=2022-07-01 -H "Authorization: Bearer $TOKEN" -s)
-
         if [ $(echo $RESULT | jq -r .id) == '[KV_URI]' ]; then
           echo "Key Vault is accessible"
           KV_ACCESS=true
           break
         fi
-
         if [ $(echo $RESULT | jq -r .error.code) == 'AuthorizationFailed' ]; then
           echo "Key Vault is not accessible - waiting 30s for Azure RBAC"
           sleep 30s
